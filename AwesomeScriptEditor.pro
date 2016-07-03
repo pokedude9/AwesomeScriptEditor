@@ -57,7 +57,15 @@ SOURCES += \
     src/Widgets/ASEEditorPopupLabel.cpp \
     src/Widgets/ASEEditorPopup.cpp \
     src/Widgets/ASEEditorSlots.cpp \
-    src/Widgets/ASEHexBox.cpp
+    src/Widgets/ASEHexBox.cpp \
+    src/System/Configuration.cpp \
+    src/Parser/Parameter.cpp \
+    src/Parser/Command.cpp \
+    src/Parser/MacroParam.cpp \
+    src/Parser/MacroFixedParam.cpp \
+    src/Parser/MacroDynamicParam.cpp \
+    src/Parser/MacroEntry.cpp \
+    src/Parser/Macro.cpp
 
 
 #
@@ -72,7 +80,16 @@ HEADERS  += \
     include/ASE/Widgets/ASEEditor.hpp \
     include/ASE/Widgets/ASEEditorPopupLabel.hpp \
     include/ASE/Widgets/ASEEditorPopup.hpp \
-    include/ASE/Widgets/ASEHexBox.hpp
+    include/ASE/Widgets/ASEHexBox.hpp \
+    include/ASE/System/Configuration.hpp \
+    include/ASE/Parser/ParameterType.hpp \
+    include/ASE/Parser/Parameter.hpp \
+    include/ASE/Parser/Command.hpp \
+    include/ASE/Parser/MacroParam.hpp \
+    include/ASE/Parser/MacroFixedParam.hpp \
+    include/ASE/Parser/MacroDynamicParam.hpp \
+    include/ASE/Parser/MacroEntry.hpp \
+    include/ASE/Parser/Macro.hpp
 
 
 #
