@@ -86,6 +86,15 @@ namespace ase
     protected:
 
         ///////////////////////////////////////////////////////////
+        /// \brief Intercepts the event after window was shown.
+        ///
+        /// This function determines whether the loading of
+        /// commands was successful and shows a message if not.
+        ///
+        ///////////////////////////////////////////////////////////
+        void showEvent(QShowEvent *event);
+
+        ///////////////////////////////////////////////////////////
         /// \brief Programmatically creates widgets.
         ///
         ///////////////////////////////////////////////////////////
@@ -108,6 +117,36 @@ namespace ase
         ///
         ///////////////////////////////////////////////////////////
         void resetUi();
+
+        ///////////////////////////////////////////////////////////
+        /// \brief Saves the script at given tab index.
+        ///
+        ///////////////////////////////////////////////////////////
+        void saveScript(int tabIndex);
+
+        ///////////////////////////////////////////////////////////
+        /// \brief Saves the script at given tab as new file.
+        ///
+        ///////////////////////////////////////////////////////////
+        void saveScriptAs(int tabIndex);
+
+
+    private slots:
+
+        void on_tabWidget_currentChanged(int index);
+        void on_tabWidget_tabCloseRequested(int index);
+        void on_plainTextEdit_textChanged();
+        void on_actionNew_Script_triggered();
+        void on_actionSave_Script_triggered();
+        void on_actionSave_ROM_triggered();
+        void on_actionSave_As_triggered();
+        void on_actionUndo_triggered();
+        void on_actionRedo_triggered();
+        void on_actionCut_triggered();
+        void on_actionCopy_triggered();
+        void on_actionPaste_triggered();
+        void on_actionDelete_triggered();
+        void on_actionSelect_All_triggered();
 
 
     private:

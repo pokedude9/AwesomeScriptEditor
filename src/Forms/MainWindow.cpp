@@ -37,6 +37,7 @@
 ///////////////////////////////////////////////////////////
 #include <ASE/System/Configuration.hpp>
 #include <ASE/Forms/MainWindow.h>
+#include <ASE/Widgets/Misc/Messages.hpp>
 #include <ASE/Scripting/Decompiler.hpp>
 #include "ui_MainWindow.h"
 
@@ -106,6 +107,7 @@ namespace ase
         m_CommandBox->setMaximumHeight(22);
         m_CommandBox->setFixedHeight(22);
         m_CommandBox->setObjectName("m_CommandBox");
+        m_DecompileBox->setObjectName("m_DecompileBox");
         m_DecompileBox->setMaxLength(7);
         m_DecompileBox->setContentsMargins(4, 0, 8, 0);
         m_CommandBox->setEditable(true);
@@ -166,5 +168,451 @@ namespace ase
         ui->plainTextEdit->setPreprocessor(preproc);
         ui->plainTextEdit->setMacroFunctions(macroFunctions);
         ui->plainTextEdit->setMacroFunctionInfos(macroInfos);
+    }
+
+    ///////////////////////////////////////////////////////////
+    // Function type:  Internal
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
+    void MainWindow::resetUi()
+    {
+        ui->actionSave_ROM->setEnabled(false);
+        ui->actionFind->setEnabled(false);
+        ui->actionDecompile->setEnabled(false);
+        ui->actionDecompile_Script->setEnabled(false);
+        ui->actionDecompile_Levelscript->setEnabled(false);
+    }
+
+    ///////////////////////////////////////////////////////////
+    // Function type:  Internal
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
+    void MainWindow::setupAfterRom()
+    {
+        ui->actionSave_ROM->setEnabled(true);
+        ui->actionFind->setEnabled(true);
+        ui->actionDecompile->setEnabled(true);
+        ui->actionDecompile_Script->setEnabled(true);
+        ui->actionDecompile_Levelscript->setEnabled(true);
+
+        if (m_Rom.info().isExpanded())
+            m_DecompileBox->setMaxLength(7);
+        else
+            m_DecompileBox->setMaxLength(6);
+    }
+
+    ///////////////////////////////////////////////////////////
+    // Function type:  Internal
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
+    void MainWindow::saveScript(int tabIndex)
+    {
+        QWidget *currentTab = ui->tabWidget->widget(tabIndex);
+        QString currentScr = currentTab->property("file").toString();
+        QFileInfo fileInfo(currentScr);
+
+
+        // Must save _as_ if file is not existing
+        if (currentScr.isEmpty() || !fileInfo.exists())
+        {
+            saveScriptAs(tabIndex);
+        }
+        else
+        {
+            QFile file(currentScr);
+            if (!file.open(QIODevice::WriteOnly))
+            {
+                QString error("Error while writing to file: \"{0}\".");
+                Messages::showError(this, error.replace("{0}", currentScr));
+                return;
+            }
+
+
+            // Retrieves the file's contents
+            QByteArray stringToWrite;
+            if (tabIndex != ui->tabWidget->currentIndex())
+                stringToWrite = ui->tabWidget->widget(tabIndex)->property("data").toString().toUtf8();
+            else
+                stringToWrite = ui->plainTextEdit->toPlainText().toUtf8();
+
+
+            // Removes the asterisk that indicates an unsaved file
+            QString tabText = ui->tabWidget->tabText(tabIndex);
+            if (tabText.right(1) == "*")
+                tabText.remove(tabText.length()-1, 1);
+
+
+            // Writes the new contents
+            ui->tabWidget->setTabText(tabIndex, tabText);
+            ui->tabWidget->currentWidget()->setProperty("save", QVariant(false));
+            ui->tabWidget->widget(tabIndex)->setProperty("prev", QString(stringToWrite));
+            ui->tabWidget->widget(tabIndex)->setProperty("data", QString(stringToWrite));
+            file.write(stringToWrite);
+            file.close();
+        }
+    }
+
+    ///////////////////////////////////////////////////////////
+    // Function type:  Internal
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
+    void MainWindow::saveScriptAs(int tabIndex)
+    {
+        // Shows a dialog to retrieve the file path
+        QString path = QFileDialog::getSaveFileName
+        (
+            this,
+            tr("Save script as"),
+            QDir::homePath(),
+            "Scripts (*.asc)"
+        );
+
+
+        // Saves the file if valid location picked
+        if (!path.isNull() && !path.isEmpty())
+        {
+            QFile file(path);
+            if (!file.open(QIODevice::WriteOnly))
+            {
+                QString error("Error while writing to file: \"{0}\".");
+                Messages::showError(this, error.replace("{0}", path));
+                return;
+            }
+
+
+            // Retrieves the file's contents
+            QFileInfo info(path);
+            QByteArray stringToWrite;
+            if (tabIndex != ui->tabWidget->currentIndex())
+                stringToWrite = ui->tabWidget->widget(tabIndex)->property("data").toString().toUtf8();
+            else
+                stringToWrite = ui->plainTextEdit->toPlainText().toUtf8();
+
+
+            // Writes the new contents
+            ui->tabWidget->setTabText(tabIndex, info.fileName());
+            ui->tabWidget->currentWidget()->setProperty("save", QVariant(false));
+            ui->tabWidget->widget(tabIndex)->setProperty("prev", QString(stringToWrite));
+            ui->tabWidget->widget(tabIndex)->setProperty("data", QString(stringToWrite));
+            file.write(stringToWrite);
+            file.close();
+        }
+    }
+
+    ///////////////////////////////////////////////////////////
+    // Function type:  Virtual
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
+    void MainWindow::showEvent(QShowEvent *event)
+    {
+        // Shows the window before displaying the msgbox
+        QMainWindow::showEvent(event);
+
+
+        // Determines whether at least one command and command file exist
+        if (Configuration::getAmount() == 0 || Configuration::getCommands(0).isEmpty())
+        {
+            Messages::showMessage
+            (
+                this,
+                "A valid XML file containing the scripting commands could not be found.\n"
+                 "The file must be named \"Script.<name>.xml\" whereas \"<name>\" can be\n"
+                 "any name you like, and it must be stored in the settings folder. It\n"
+                 "furthermore has to contain at least one valid command."
+            );
+
+
+            close();
+            qApp->exit();
+        }
+        else
+        {
+            Configuration::setActive(0);
+            m_CommandBox->setCurrentIndex(0);
+        }
+    }
+
+
+    ///////////////////////////////////////////////////////////
+    // Function type:  Slot
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
+    void MainWindow::on_tabWidget_currentChanged(int index)
+    {
+        // If there are no tabs at the moment, disable scripting
+        if (ui->tabWidget->count() == 0)
+        {
+            ui->plainTextEdit->setEnabled(false);
+            ui->tabWidget->setEnabled(false);
+            ui->tabWidget->setVisible(false);
+            ui->actionSave->setEnabled(false);
+            ui->actionSave_As->setEnabled(false);
+            ui->actionSave_Script->setEnabled(false);
+        }
+        else
+        {
+            ui->plainTextEdit->setEnabled(true);
+            ui->tabWidget->setEnabled(true);
+            ui->tabWidget->setVisible(true);
+            ui->actionSave->setEnabled(true);
+            ui->actionSave_As->setEnabled(true);
+            ui->actionSave_Script->setEnabled(true);
+        }
+
+
+        // Abort loading script file if no tab selected
+        if (index == -1)
+        {
+            ui->plainTextEdit->setEnabled(false);
+            ui->plainTextEdit->clear();
+            m_PrevTab = index;
+            return;
+        }
+
+
+        // Saves the currently displayed data for this tab
+        if (m_PrevTab >= 0 && ui->tabWidget->widget(m_PrevTab) != NULL)
+            ui->tabWidget->widget(m_PrevTab)->setProperty("data", QVariant(ui->plainTextEdit->toPlainText()));
+
+
+        // Displays the new data
+        QByteArray data = ui->tabWidget->widget(index)->property("data").toByteArray();
+        ui->plainTextEdit->setPlainText(QString(data));
+        m_PrevTab = index;
+    }
+
+    ///////////////////////////////////////////////////////////
+    // Function type:  Slot
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
+    void MainWindow::on_tabWidget_tabCloseRequested(int index)
+    {
+        if (ui->tabWidget->widget(index)->property("save").toBool())
+        {
+            QString question("The file \"{0}\" has unsaved changes. Want to save the file now?");
+            QString fileName(ui->tabWidget->tabText(index));
+            fileName.replace('*', "");
+            question.replace("{0}", fileName);
+
+
+            // Offers to save the modified data before closing the tab
+            if (Messages::showQuestion(this, question))
+                saveScript(index);
+        }
+
+
+        // Removes the tab
+        ui->tabWidget->removeTab(index);
+    }
+
+    ///////////////////////////////////////////////////////////
+    // Function type:  Slot
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
+    void MainWindow::on_plainTextEdit_textChanged()
+    {
+        if (!ui->plainTextEdit->isVisible() || !ui->plainTextEdit->isEnabled())
+            return;
+
+
+        // Determines whether text can be undone/redone
+        ui->actionUndo->setEnabled(ui->plainTextEdit->document()->isUndoAvailable());
+        ui->actionRedo->setEnabled(ui->plainTextEdit->document()->isRedoAvailable());
+        ui->actionPaste->setEnabled(ui->plainTextEdit->canPaste());
+
+
+        // Loads the previous and the current data
+        QString dataOld = ui->tabWidget->currentWidget()->property("prev").toString();
+        QString dataNew = ui->plainTextEdit->toPlainText();
+
+        // Determines whether the data was changed
+        if (dataOld != dataNew)
+        {
+            QString text = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
+            if (text.right(1) != "*")
+                text.append('*');
+
+            ui->tabWidget->setTabText(ui->tabWidget->currentIndex(), text);
+            ui->tabWidget->currentWidget()->setProperty("save", QVariant(true));
+        }
+        else
+        {
+            QString text = ui->tabWidget->tabText(ui->tabWidget->currentIndex());
+            if (text.right(1) == "*")
+                text.remove(text.length() - 1, 1);
+
+            ui->tabWidget->setTabText(ui->tabWidget->currentIndex(), text);
+            ui->tabWidget->currentWidget()->setProperty("save", QVariant(false));
+        }
+    }
+
+    ///////////////////////////////////////////////////////////
+    // Function type:  Slot
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
+    void MainWindow::on_actionNew_Script_triggered()
+    {
+        // Prepares a new tab
+        QWidget *tab = new QWidget;
+        QString text = QString("NewScript") + QString::number(ui->tabWidget->count()+1);
+
+
+        // Sets some properties for the new tab
+        tab->setProperty("data", QVariant(QString("")));
+        tab->setProperty("prev", QVariant(QString("")));
+        tab->setProperty("save", QVariant(false));
+
+
+        // Adds this tab and selects it
+        ui->tabWidget->addTab(tab, text);
+        ui->tabWidget->setCurrentWidget(tab);
+    }
+
+    ///////////////////////////////////////////////////////////
+    // Function type:  Slot
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
+    void MainWindow::on_actionSave_Script_triggered()
+    {
+        saveScript(ui->tabWidget->currentIndex());
+    }
+
+    ///////////////////////////////////////////////////////////
+    // Function type:  Slot
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
+    void MainWindow::on_actionSave_As_triggered()
+    {
+        saveScriptAs(ui->tabWidget->currentIndex());
+    }
+
+    ///////////////////////////////////////////////////////////
+    // Function type:  Slot
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
+    void MainWindow::on_actionUndo_triggered()
+    {
+        ui->plainTextEdit->undo();
+    }
+
+    ///////////////////////////////////////////////////////////
+    // Function type:  Slot
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
+    void MainWindow::on_actionRedo_triggered()
+    {
+        ui->plainTextEdit->redo();
+    }
+
+    ///////////////////////////////////////////////////////////
+    // Function type:  Slot
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
+    void MainWindow::on_actionCut_triggered()
+    {
+        ui->plainTextEdit->cut();
+    }
+
+    ///////////////////////////////////////////////////////////
+    // Function type:  Slot
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
+    void MainWindow::on_actionCopy_triggered()
+    {
+        ui->plainTextEdit->copy();
+    }
+
+    ///////////////////////////////////////////////////////////
+    // Function type:  Slot
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
+    void MainWindow::on_actionPaste_triggered()
+    {
+        ui->plainTextEdit->paste();
+    }
+
+    ///////////////////////////////////////////////////////////
+    // Function type:  Slot
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
+    void MainWindow::on_actionDelete_triggered()
+    {
+        QTextCursor cursor = ui->plainTextEdit->textCursor();
+        cursor.removeSelectedText();
+        ui->plainTextEdit->setTextCursor(cursor);
+    }
+
+    ///////////////////////////////////////////////////////////
+    // Function type:  Slot
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
+    void MainWindow::on_actionSelect_All_triggered()
+    {
+        ui->plainTextEdit->selectAll();
+    }
+
+    ///////////////////////////////////////////////////////////
+    // Function type:  Slot
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
+    void MainWindow::on_actionSave_ROM_triggered()
+    {
     }
 }

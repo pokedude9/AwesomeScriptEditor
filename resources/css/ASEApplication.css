@@ -1,6 +1,11 @@
 /* QComboBox viewport */
 QComboBox#m_CommandBox
 {
-    padding: 0px 0px 1px 13px;
     margin: 0px 8px 0px 2px;
+}
+
+/* QLineEdit viewport */
+QLineEdit#m_DecompileBox
+{
+    padding: 0px 0px 1px 13px;
 }
