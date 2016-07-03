@@ -215,9 +215,19 @@ namespace ase
         void keyPressEvent(QKeyEvent *event) Q_DECL_OVERRIDE;
 
         ///////////////////////////////////////////////////////////
+        /// \brief Intercepts the key-release event.
+        ///
+        /// Converts a tabulator to four whitespaces.
+        ///
+        /// \param event Structure containing key and text
+        ///
+        ///////////////////////////////////////////////////////////
+        void keyReleaseEvent(QKeyEvent *event) Q_DECL_OVERRIDE;
+
+        ///////////////////////////////////////////////////////////
         /// \brief Provides custom resizing logic.
         ///
-        /// If the height of the pory::ASEEditor changes, the
+        /// If the height of the ase::ASEEditor changes, the
         /// line widget's height must also be adjusted.
         ///
         /// \param event Structure containing the new height

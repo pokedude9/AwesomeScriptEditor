@@ -167,6 +167,33 @@ namespace ase
         }
 
 
+        // Hightlights macro definitions
+        QString pattern("(^|\\s)");
+        if (m_UseXSE)
+            pattern.append("#");
+        else
+            pattern.append(".");
+        pattern.append("define");
+        pattern.append("\\s+\\w+\\s+");
+        regex.setPattern(pattern);
+        match = regex.match(text);
+        if (match.hasMatch())
+        {
+            // This regex can only have one match!
+            setFormat(match.capturedStart(), match.capturedLength(), m_ClrPointer);
+        }
+
+
+        // Highlights normal strings through regex
+        regex.setPattern("(\"|<)\\D+(\"|>)");
+        match = regex.match(text);
+        if (match.hasMatch())
+        {
+            // This regex can only have one match!
+            setFormat(match.capturedStart(), match.capturedLength(), m_ClrPokeText);
+        }
+
+
         // Highlights Pokémon text through regex
         regex.setPattern("^=\\s.*$");
         match = regex.match(text);
@@ -180,7 +207,6 @@ namespace ase
         // Highlights the only preprocessor (if existing) in this line
         if (!m_Preprocessor.isEmpty())
         {
-            QString pattern;
             if (m_UseXSE)
                 pattern = (QString("^#(") + m_Preprocessor.at(0));
             else

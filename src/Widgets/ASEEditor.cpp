@@ -71,7 +71,7 @@ namespace ase
 
         // Changes properties of this widget
         QPalette palette;
-        palette.setColor(QPalette::Base, QColor(0xF5F5F5));
+        palette.setColor(QPalette::Base, QColor(0xFFFFFF));
         palette.setColor(QPalette::Text, QColor(0x505050));
         setFrameStyle(QFrame::NoFrame);
         setAutoFillBackground(true);

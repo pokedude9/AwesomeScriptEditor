@@ -61,6 +61,21 @@ namespace ase
     // Date of edit:   7/3/2016
     //
     ///////////////////////////////////////////////////////////
+    void ASEEditor::keyReleaseEvent(QKeyEvent *event)
+    {
+        if (event->key() == Qt::Key_Tab)
+            return;
+
+        QPlainTextEdit::keyReleaseEvent(event);
+    }
+
+    ///////////////////////////////////////////////////////////
+    // Function type:  Virtual
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
     void ASEEditor::keyPressEvent(QKeyEvent *event)
     {
         // The keys in the switch will be forwarded
@@ -80,6 +95,14 @@ namespace ase
             }
         }
 
+
+        if (event->key() == Qt::Key_Tab)
+        {
+            QTextCursor cursor = textCursor();
+            cursor.insertText("    ");
+            setTextCursor(cursor);
+            return;
+        }
 
         // Processes default key-press behaviour
         QPlainTextEdit::keyPressEvent(event);

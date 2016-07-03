@@ -107,7 +107,26 @@ QTabBar::close-button:pressed
      </widget>
     </item>
     <item row="1" column="0">
-     <widget class="ase::ASEEditor" name="plainTextEdit"/>
+     <widget class="ase::ASEEditor" name="plainTextEdit">
+      <property name="styleSheet">
+       <string notr="true">QPlainTextEdit#plainTextEdit
+{
+	border-top: 1px solid #909090;
+	border-bottom: 1px solid #909090;
+}
+
+QPlainTextEdit#plainTextEdit
+{
+	background-color: #FFFFFF;
+}</string>
+      </property>
+      <property name="lineWrapMode">
+       <enum>QPlainTextEdit::NoWrap</enum>
+      </property>
+      <property name="tabStopWidth">
+       <number>40</number>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
