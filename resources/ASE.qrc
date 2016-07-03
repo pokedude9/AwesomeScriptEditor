@@ -1,0 +1,24 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/arrow_down.png</file>
+        <file>images/function.png</file>
+        <file>images/info.png</file>
+        <file>images/macro.png</file>
+        <file>images/macroFunction.png</file>
+        <file>images/pointer.png</file>
+        <file>images/tab_close.png</file>
+        <file>images/tab_close_hover.png</file>
+        <file>images/tab_close_press.png</file>
+        <file>images/toolbar_comp.png</file>
+        <file>images/toolbar_decomp.png</file>
+        <file>images/toolbar_find.png</file>
+        <file>images/toolbar_level.png</file>
+        <file>images/toolbar_open.png</file>
+        <file>images/toolbar_save.png</file>
+        <file>misc/DefaultSettings.xml</file>
+        <file>css/ASEApplication.css</file>
+        <file>css/ASEEditorPopup.css</file>
+        <file>css/ASEEditorPopup2.css</file>
+        <file>css/ASEEditorPopupLabel.css</file>
+    </qresource>
+</RCC>

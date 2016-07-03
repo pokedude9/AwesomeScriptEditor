@@ -1,0 +1,23 @@
+/* QListView viewport */
+QListView
+{
+    border: 1px solid #b9b9b9;
+    background-color: #fafafa;
+    outline: none;
+    color: #505050;
+}
+
+/* QListView item selection */
+QListView::item:selected
+{
+    padding: -1px;
+    background-color: #90c8f6;
+    border: 1px solid #60b0f9;
+    color: #505050;
+}
+
+/* QListView normal item */
+QListView::item:!selected:hover
+{
+    background: transparent;
+}

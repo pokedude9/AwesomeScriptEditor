@@ -1,0 +1,76 @@
+/* QLabel viewport */
+QLabel
+{
+    color: #505050;
+}
+
+/* QLineEdit viewport */
+QLineEdit
+{
+    color: #505050;
+    border: 1px solid #b9b9b9;
+    padding: 0px 0px 1px 13px;
+    selection-background-color: #d9d9d9;
+    selection-color: #505050;
+}
+
+/* QComboBox viewport */
+QComboBox
+{
+    color: #505050;
+    border: 1px solid #b9b9b9;
+    margin: 0px 8px 0px 2px;
+    selection-background-color: #d9d9d9;
+    selection-color: #505050;
+}
+
+/* QComboBox drop-down box */
+QComboBox::drop-down
+{
+    color: #505050;
+    width: 20px;
+    margin: 0px 0x 0px 4px;
+    background: white;
+    image: url(:/misc/arrow_down.png);
+}
+
+/* QComboBox drop-down box @ hover */
+QComboBox::drop-down:hover
+{
+   width: 18px;
+   background-color: #d8e6f2;
+   border: 1px solid #c0dcf3;
+}
+
+/* QComboBox drop-down box @ pressed and showed */
+QComboBox::drop-down:pressed, QComboBox::drop-down:on
+{
+   width: 18px;
+   background-color: #c0dcf3;
+   border: 1px solid #90c8f6;
+}
+
+/* QComboBox drop-down menu */
+QComboBox QAbstractItemView
+{
+    background: white;
+    border: 1px solid #b9b9b9;
+    outline: none;
+    color: #505050;
+}
+
+/* QComboBox drop-down menu item */
+QComboBox QAbstractItemView::item
+{
+    background: transparent;
+    border: 1px solid transparent;
+    padding: 2px 25px 2px 20px;
+    color: #505050;
+}
+
+/* QComboBox drop-down menu item @ selected */
+QComboBox QAbstractItemView::item:selected
+{
+    background-color: #c0dcf3;
+    color: #505050;
+}

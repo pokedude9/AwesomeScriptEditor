@@ -1,0 +1,3128 @@
+<!-- Sample command
+    <command>
+        <byte>0x0</byte>
+        <name>nop</name>
+        <info>Does absolutely nothing.</info>
+    </command>
+-->
+
+<document>
+<commands>
+    <command>
+        <byte>0x0</byte>
+        <name>nop</name>
+        <info>Does absolutely nothing. Can be used as placeholder.</info>
+    </command>
+    <command>
+        <byte>0x1</byte>
+        <name>nop2</name>
+        <info>Does also absolutely nothing. Can be used as placeholder.</info>
+    </command>
+    <command>
+        <byte>0x2</byte>
+        <name>end</name>
+        <info>Terminates the script and exits the scripthandler.</info>
+    </command>
+    <command>
+        <byte>0x3</byte>
+        <name>return</name>
+        <info>Returns to the latest CALL statement and continues execution at that position.</info>
+    </command>
+    <command>
+        <byte>0x4</byte>
+        <name>call</name>
+        <info>Continues script execution from the specified offset. Can be returned to when calling RETURN.</info>
+        <params>
+            <param>
+                <type>pointer</type>
+                <name>Destination</name>
+                <info>A pointer to the offset to jump to. Can be a dynamic label or offset.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x5</byte>
+        <name>goto</name>
+        <info>Continues script execution from the specified offset.</info>
+        <params>
+            <param>
+                <type>pointer</type>
+                <name>Destination</name>
+                <info>A pointer to the offset to jump to. Can be a dynamic label or offset.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x6</byte>
+        <name>if {0} goto {1}</name>
+        <info>If the result of the last comparison matches the condition, script execution is continued from specified offset.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Condition</name>
+                <info>Read the user-manual to receive a list of valid conditions.</info>
+            </param>
+            <param>
+                <type>pointer</type>
+                <name>Destination</name>
+                <info>A pointer to the offset to jump to. Can be a dynamic label or offset.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x7</byte>
+        <name>if {0} call {1}</name>
+        <info>If the result of the last comparison matches the condition, script execution is continued from specified offset.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Condition</name>
+                <info>Read the user-manual to receive a list of valid conditions.</info>
+            </param>
+            <param>
+                <type>pointer</type>
+                <name>Destination</name>
+                <info>A pointer to the offset to jump to. Can be a dynamic label or offset.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x8</byte>
+        <name>gotostd</name>
+        <info>Jumps to the standard function at the given index.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Function index</name>
+                <info>The entry at the pointer table at INDEX will be called as a function.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x9</byte>
+        <name>callstd</name>
+        <info>Jumps to the standard function at the given index. Can be returned to when calling RETURN.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Function index</name>
+                <info>The entry at the pointer table at INDEX will be called as a function.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xA</byte>
+        <name>gotostdif</name>
+        <info>Jumps to the standard function if the specified condition is met to the latest comparison.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Condition</name>
+                <info>Read the user-manual to receive a list of valid conditions.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Function index</name>
+                <info>The entry at the pointer table at INDEX will be called as a function.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xB</byte>
+        <name>callstdif</name>
+        <info>Calls the standard function if the specified condition is met to the latest comparison.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Condition</name>
+                <info>Read the user-manual to receive a list of valid conditions.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Function index</name>
+                <info>The entry at the pointer table at INDEX will be called as a function.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xC</byte>
+        <name>jumpram</name>
+        <info>Executes a specific script that is stored at a default RAM location.</info>
+    </command>
+    <command>
+        <byte>0xD</byte>
+        <name>killscript</name>
+        <info>Terminates the script and writes zeroes to the RAM that involves scripting.</info>
+    </command>
+    <command>
+        <byte>0xE</byte>
+        <name>setbyte</name>
+        <info>Writes the given byte value as WORD to EWRAM address 0x0203AAA8.</info>
+    </command>
+    <command>
+        <byte>0xF</byte>
+        <name>setbank</name>
+        <info>Writes the specified word value to the script bank at the given index.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Bank</name>
+                <info>Number of the bank to write value to.</info>
+            </param>
+            <param>
+                <type>textpointer</type>
+                <name>Value</name>
+                <info>Value to write to the bank.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x10</byte>
+        <name>setbank2</name>
+        <info>Writes the specified byte value to the script bank at the given index.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Bank</name>
+                <info>Number of the bank to write value to.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Value</name>
+                <info>Value to write to the bank.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x11</byte>
+        <name>writebyte</name>
+        <info>Writes the specified byte value to the given offset in the RAM.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Value</name>
+                <info>Value to write to the RAM offset.</info>
+            </param>
+            <param>
+                <type>pointer</type>
+                <name>Offset</name>
+                <info>RAM offset to write value to.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x12</byte>
+        <name>loadbyte</name>
+        <info>Loads the byte from a given RAM location to the specified script bank.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Bank</name>
+                <info>Bank to load the byte to.</info>
+            </param>
+            <param>
+                <type>pointer</type>
+                <name>Source offset</name>
+                <info>RAM offset to load value from.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x13</byte>
+        <name>loadbyte2</name>
+        <info>The reverse operation of LOADBYTE. Loads a byte from the specified script bank and stores it in the given RAM location.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Bank</name>
+                <info>Bank to load the byte from.</info>
+            </param>
+            <param>
+                <type>pointer</type>
+                <name>Destination offset</name>
+                <info>RAM offset to load value to.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x14</byte>
+        <name>copybank</name>
+        <info>Copies a word value from one script bank to another one.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Destination</name>
+                <info>Bank to copy the value to.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Source</name>
+                <info>Bank to load the byte from.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x15</byte>
+        <name>copybyte</name>
+        <info>Copies a byte value from one RAM offset to another one.</info>
+        <params>
+            <param>
+                <type>pointer</type>
+                <name>Destination offset</name>
+                <info>RAM offset to copy value to.</info>
+            </param>
+            <param>
+                <type>pointer</type>
+                <name>Source offset</name>
+                <info>RAM offset to load value from.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x16</byte>
+        <name>setvar</name>
+        <info>Changes the value of the given variable to the specified hword.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Variable</name>
+                <info>Variable to write hword value to.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Value</name>
+                <info>The hword value to write to variable.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x17</byte>
+        <name>addvar</name>
+        <info>Adds the given hword value to the specified variable.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Variable</name>
+                <info>Variable to add hword value to.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Value</name>
+                <info>The hword value to add to variable.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x18</byte>
+        <name>subvar</name>
+        <info>Substracts the given hword value from the specified variable.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Variable</name>
+                <info>Variable to substract hword value from.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Value</name>
+                <info>The hword value to substract from variable.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x19</byte>
+        <name>copyvar</name>
+        <info>Copies the value of one variable to another one.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Destination</name>
+                <info>Variable to write value to.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Source</name>
+                <info>Variable to fetch value from.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x1A</byte>
+        <name>copyvar2</name>
+        <info>Copies the value of one variable to another one OR sets a value directly.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Destination</name>
+                <info>Variable to write value to.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Source</name>
+                <info>If source is a variable, copies the value. Otherwise, sets a hword value directly.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x1B</byte>
+        <name>comparebanks</name>
+        <info>Casts the bank values to bytes and compares them afterwards.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>First bank</name>
+                <info>The first bank to compare.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Second bank</name>
+                <info>The second bank to compare.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x1C</byte>
+        <name>comparebanktobyte</name>
+        <info>Compares the least-significant byte of the script bank value to a byte value.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Bank</name>
+                <info>The bank to compare the byte value from.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Value</name>
+                <info>Value to compare to bank.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x1D</byte>
+        <name>comparebanktobyte2</name>
+        <info>Acts like COMPAREBANKTOBYTE, but instead retrieves the byte value to compare from a RAM location</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Bank</name>
+                <info>The bank to compare the byte value from.</info>
+            </param>
+            <param>
+                <type>pointer</type>
+                <name>RAM offset</name>
+                <info>The RAM offset to load the byte value from.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x1E</byte>
+        <name>comparebytetobank</name>
+        <info>Acts like COMPAREBANKTOBYTE2, just with reversed parameters.</info>
+        <params>
+            <param>
+                <type>pointer</type>
+                <name>RAM offset</name>
+                <info>The RAM offset to load the byte value from.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Bank</name>
+                <info>The bank to compare the byte value from.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x1F</byte>
+        <name>comparebytes</name>
+        <info>Compares a byte loaded from a RAM location to a given byte value.</info>
+        <params>
+            <param>
+                <type>pointer</type>
+                <name>RAM offset</name>
+                <info>The RAM offset to load the byte value from.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Value</name>
+                <info>Value to compare to value at RAM offset.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x20</byte>
+        <name>comparebytes2</name>
+        <info>Compares a byte from a RAM location to another byte from a RAM location.</info>
+        <params>
+            <param>
+                <type>pointer</type>
+                <name>RAM offset 1</name>
+                <info>The first RAM offset to load value from.</info>
+            </param>
+            <param>
+                <type>pointer</type>
+                <name>RAM offset 2</name>
+                <info>The second RAM offset to load value from.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x21</byte>
+        <name>compare</name>
+        <info>Compares the value of a variable to a given hword value.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Variable</name>
+                <info>Variable to compare to.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Value</name>
+                <info>Value to compare to variable.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x22</byte>
+        <name>comparevars</name>
+        <info>Compares the values of two given variables.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Variable 1</name>
+                <info>First variable to compare to.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Variable 2</name>
+                <info>Second variable to compare to.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x23</byte>
+        <name>callasm</name>
+        <info>Executes the machine code located at the given offset.</info>
+        <params>
+            <param>
+                <type>pointer</type>
+                <name>Routine</name>
+                <info>Specifies the offset of the routine.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x24</byte>
+        <name>copyasm</name>
+        <info>Copies the given routine offset to the RAM section that is used by the scripthandler.</info>
+        <params>
+            <param>
+                <type>pointer</type>
+                <name>Routine</name>
+                <info>Effects on replacing the previous ASM routine have not yet been investigated.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x25</byte>
+        <name>special</name>
+        <info>Calls a built-in special function at the given function index.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Function</name>
+                <info>Index in the special pointer table.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x26</byte>
+        <name>special2</name>
+        <info>Calls a built-in special function at the given function index and its return argument will be written to the variable.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Variable</name>
+                <info>The output of the function is stored in this variable.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Function</name>
+                <info>Index in the special pointer table.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x27</byte>
+        <name>waitstate</name>
+        <info>Pauses script execution until a routine manually resumes it. Can result in an infinite loop if used wrongly.</info>
+    </command>
+    <command>
+        <byte>0x28</byte>
+        <name>pause</name>
+        <info>Pauses script execution for the specified amount of frames.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Frames</name>
+                <info>1 second = 59.71 frames (GBA refresh rate)</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x29</byte>
+        <name>setflag</name>
+        <info>Sets the specified flag to 1, i.e. activates it.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Flag</name>
+                <info>ID of the flag to activate.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x2A</byte>
+        <name>clearflag</name>
+        <info>Sets the specified flag to 0, i.e. deactivates it.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Flag</name>
+                <info>ID of the flag to deactivate.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x2B</byte>
+        <name>checkflag</name>
+        <info>Determines whether the specified flag is activated or not.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Flag</name>
+                <info>ID of the flag to compare.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x2C</byte>
+        <name>cmd2c</name>
+        <info>Does only exist in R/S/E. Purpose yet to discover.</info>
+    </command>
+    <command>
+        <byte>0x2D</byte>
+        <name>checkdailyflags</name>
+        <info>Does only exist in R/S/E. Determines whether a day has passed.</info>
+    </command>
+    <command>
+        <byte>0x2E</byte>
+        <name>gettime</name>
+        <info>R/S/E only. Stores hours, minutes and seconds into variables 0x8000-0x8002.</info>
+    </command>
+    <command>
+        <byte>0x2F</byte>
+        <name>sound</name>
+        <info>Plays the given sound. If 0x0, all channels will be muted.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Sound</name>
+                <info>Index of the sound within the sound table.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x30</byte>
+        <name>waitsound</name>
+        <info>Pauses the script until the current sound (played via SOUND) has finished playing.</info>
+    </command>
+    <command>
+        <byte>0x31</byte>
+        <name>fanfare</name>
+        <info>Plays the given fanfare.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Fanfare</name>
+                <info>Can be either the index of the fanfare or a variable that contains the index.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x32</byte>
+        <name>waitfanfare</name>
+        <info>Pauses the script until the current fanfare (played via FANFARE) has finished playing.</info>
+    </command>
+    <command>
+        <byte>0x33</byte>
+        <name>playsong</name>
+        <info>Plays the given song. The second argument should always be set to 0x0!</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Music</name>
+                <info>Index of the music within the music table.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Unknown</name>
+                <info>Appearantly is always 0x0.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x34</byte>
+        <name>playsong2</name>
+        <info>Plays the given song in another channel. The second argument should always be set to 0x0!</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Music</name>
+                <info>Index of the music within the music table.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x35</byte>
+        <name>fadedefault</name>
+        <info>Fades the currently playing song into the map's default song.</info>
+    </command>
+    <command>
+        <byte>0x36</byte>
+        <name>fadesong</name>
+        <info>Fades the currently playing song into the specified song.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Music</name>
+                <info>Index of the music to fade to.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x37</byte>
+        <name>fadeout</name>
+        <info>Fades out the currently playing song with the specified speed.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Speed</name>
+                <info>1 second = 59,71 frames (maximum of ~4.25 seconds possible)</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x38</byte>
+        <name>fadein</name>
+        <info>Fades the currently playing song back in, with the specified speed.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Speed</name>
+                <info>1 second = 59,71 frames (maximum of ~4.25 seconds possible)</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x39</byte>
+        <name>warp</name>
+        <info>Warps to the specified bank/map at the given warp or position X/Y.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Bank</name>
+                <info>Bank of the map to warp to.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Map</name>
+                <info>Map to warp to.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Warp</name>
+                <info>Warp number to warp to. If beeing 0xFF, warps to the position specified in the following arguments.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>X position</name>
+                <info>X position to warp to. Only if WARP is 0xFF.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Y position</name>
+                <info>Y position to warp to. Only if WARP is 0xFF.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x3A</byte>
+        <name>warpmuted</name>
+        <info>Warps to the specified bank/map at the given warp or position X/Y but does not play a sound effect.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Bank</name>
+                <info>Bank of the map to warp to.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Map</name>
+                <info>Map to warp to.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Warp</name>
+                <info>Warp number to warp to. If beeing 0xFF, warps to the position specified in the following arguments.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>X position</name>
+                <info>X position to warp to. Only if WARP is 0xFF.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Y position</name>
+                <info>Y position to warp to. Only if WARP is 0xFF.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x3B</byte>
+        <name>warpwalk</name>
+        <info>Warps to the specified bank/map at the given warp or position X/Y. Player walking one step upwards.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Bank</name>
+                <info>Bank of the map to warp to.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Map</name>
+                <info>Map to warp to.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Warp</name>
+                <info>Warp number to warp to. If beeing 0xFF, warps to the position specified in the following arguments.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>X position</name>
+                <info>X position to warp to. Only if WARP is 0xFF.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Y position</name>
+                <info>Y position to warp to. Only if WARP is 0xFF.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x3C</byte>
+        <name>warphole</name>
+        <info>Warps to the specified bank/map to the same position as the current one. Player falling through the ground.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Bank</name>
+                <info>Bank of the map to warp to.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Map</name>
+                <info>Map to warp to.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x3D</byte>
+        <name>warpteleport</name>
+        <info>Warps to the specified bank/map at the given warp or position X/Y. Player beeing teleported.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Bank</name>
+                <info>Bank of the map to warp to.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Map</name>
+                <info>Map to warp to.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Warp</name>
+                <info>Warp number to warp to. If beeing 0xFF, warps to the position specified in the following arguments.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>X position</name>
+                <info>X position to warp to. Only if WARP is 0xFF.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Y position</name>
+                <info>Y position to warp to. Only if WARP is 0xFF.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x3E</byte>
+        <name>warp3</name>
+        <info>Warps to the specified bank/map at the given warp or position X/Y. Differences to WARP yet to be discovered.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Bank</name>
+                <info>Bank of the map to warp to.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Map</name>
+                <info>Map to warp to.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Warp</name>
+                <info>Warp number to warp to. If beeing 0xFF, warps to the position specified in the following arguments.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>X position</name>
+                <info>X position to warp to. Only if WARP is 0xFF.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Y position</name>
+                <info>Y position to warp to. Only if WARP is 0xFF.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x3F</byte>
+        <name>setdefaultwarp</name>
+        <info>Sets the default warp location when player is attempted to be redirected to map 127 on bank 127.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Bank</name>
+                <info>Bank of the map to warp to.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Map</name>
+                <info>Map to warp to.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Warp</name>
+                <info>Warp number to warp to. If beeing 0xFF, warps to the position specified in the following arguments.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>X position</name>
+                <info>X position to warp to. Only if WARP is 0xFF.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Y position</name>
+                <info>Y position to warp to. Only if WARP is 0xFF.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x40</byte>
+        <name>warp4</name>
+        <info>Does the same as warp3, but appearantly does not copy the map-header and events.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Bank</name>
+                <info>Bank of the map to warp to.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Map</name>
+                <info>Map to warp to.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Warp</name>
+                <info>Warp number to warp to. If beeing 0xFF, warps to the position specified in the following arguments.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>X position</name>
+                <info>X position to warp to. Only if WARP is 0xFF.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Y position</name>
+                <info>Y position to warp to. Only if WARP is 0xFF.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x41</byte>
+        <name>warp4</name>
+        <info>Does the same as warp4, but in addition does not load any of the mapscripts and connections.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Bank</name>
+                <info>Bank of the map to warp to.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Map</name>
+                <info>Map to warp to.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Warp</name>
+                <info>Warp number to warp to. If beeing 0xFF, warps to the position specified in the following arguments.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>X position</name>
+                <info>X position to warp to. Only if WARP is 0xFF.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Y position</name>
+                <info>Y position to warp to. Only if WARP is 0xFF.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x42</byte>
+        <name>getplayerpos</name>
+        <info>Retrieves the player's position on the map and stores it in the specified variables.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Variable X</name>
+                <info>This variable will contain the X-coordinate.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Variable Y</name>
+                <info>This variable will contain the Y-coordinate.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x43</byte>
+        <name>countpokemon</name>
+        <info>Retrieves the number of Pokémon in the party and stores it in variable 0x800D.</info>
+    </command>
+    <command>
+        <byte>0x44</byte>
+        <name>additem</name>
+        <info>Stores the given amount of the specified item in the player's bag. Variable 0x800D is set to 1 if successful.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Item</name>
+                <info>Index of the item. Can also be a variable containing the index.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Quantity</name>
+                <info>The amount of items to store.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x45</byte>
+        <name>removeitem</name>
+        <info>Removes the given amount of the specified item from the player's bag. If QUANTITY is above actual amount, will do nothing.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Item</name>
+                <info>Index of the item. Can also be a variable containing the index.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Quantity</name>
+                <info>The amount of items to remove.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x46</byte>
+        <name>checkitemroom</name>
+        <info>Determines whether the player has space for the item. Variable 0x800D is set to 1 if they have.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Item</name>
+                <info>Index of the item. Can also be a variable containing the index.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Quantity</name>
+                <info>The amount of items to remove.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x47</byte>
+        <name>checkitem</name>
+        <info>Determines whether the play has the given amount or more of the specified item.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Item</name>
+                <info>Index of the item. Can also be a variable containing the index.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Quantity</name>
+                <info>The amount of items to remove.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x48</byte>
+        <name>getitemtype</name>
+        <info>Retrieves the type of the given item and returns it to 0x800D. Read the user manual for advanced information.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Item</name>
+                <info>Index of the item. Can also be a variable containing the index.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x49</byte>
+        <name>addpcitem</name>
+        <info>Adds the given amount of items to the player's PC.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Item</name>
+                <info>Index of the item. Can also be a variable containing the index.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Quantity</name>
+                <info>The amount of items to remove. Can also be a variable containing the amount.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x4A</byte>
+        <name>checkpcitem</name>
+        <info>Checks if the player has the given amount or more of the specified item. Variable 0x800D will be 1, if they have.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Item</name>
+                <info>Index of the item. Can also be a variable containing the index.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Quantity</name>
+                <info>The amount of items to remove. Can also be a variable containing the amount.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x4B</byte>
+        <name>adddecoration</name>
+        <info>R/S/E only. Adds the specified decoration to the player's PC. Variable 0x800D will be 1, if successful.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Decoration</name>
+                <info>Index of the decoration. Can also be a variable containing the index.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x4C</byte>
+        <name>removedecoration</name>
+        <info>R/S/E only. Removes the specified decoration from the player's PC.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Decoration</name>
+                <info>Index of the decoration. Can also be a variable containing the index.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x4D</byte>
+        <name>testdecoration</name>
+        <info>R/S/E only. Determines if the given decoration can be added to the player's PC. 0x800D will be 1, if yes.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Decoration</name>
+                <info>Index of the decoration. Can also be a variable containing the index.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x4E</byte>
+        <name>checkdecoration</name>
+        <info>R/S/E only. Determines if the given decoration exists in the player's PC. 0x800D will be 1, if yes.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Decoration</name>
+                <info>Index of the decoration. Can also be a variable containing the index.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x4F</byte>
+        <name>applymovement</name>
+        <info>Moves the specified person. 0xFF moves the player, 0x7F moves the camera.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>NPC-ID</name>
+                <info>The ID of the NPC to move. Can also be a variable containing the index.</info>
+            </param>
+            <param>
+                <type>movement</type>
+                <name>Movement data offset</name>
+                <info>Offset of the movement data. Movement data is applied via "#move 0xMove".</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x50</byte>
+        <name>applymovement2</name>
+        <info>Moves the person that was specified in the given variable.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Variable</name>
+                <info>Variable that contains the ID of the NPC to move.</info>
+            </param>
+            <param>
+                <type>pointer</type>
+                <name>Movement data offset</name>
+                <info>Offset of the movement data. Movement data is applied via "#move 0xMove".</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x51</byte>
+        <name>waitmovement</name>
+        <info>Pauses script execution until the movement of the specified NPC ended.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>NPC-ID</name>
+                <info>If 0x0, waits until ALL movements have been finished.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x52</byte>
+        <name>waitmovementpos</name>
+        <info>Waits until the player's movement ended OR if the movement crosses the given X/Y location.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>NPC-ID</name>
+                <info>This should always be 0xFF (for the player).</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>X-coordinate</name>
+                <info>X-coo of the position at which player is forced to stop.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Y-coordinate</name>
+                <info>Y-coo of the position at which player is forced to stop.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x53</byte>
+        <name>hidesprite</name>
+        <info>Hides the person with the specified ID number.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>NPC-ID</name>
+                <info>The number of the person to be hidden. Can also be a variable containing the index.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x54</byte>
+        <name>hidespritelevel</name>
+        <info>Hides the sprite and moves it to a specific location. Triggers a permanent change in level-scripts.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>NPC-ID</name>
+                <info>The number of the person to be hidden. Can also be a variable containing the index.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>X-position</name>
+                <info>Specifies the X-position of the sprite to be moved.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Y-position</name>
+                <info>Specifies the Y-position of the sprite to be moved.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x55</byte>
+        <name>showsprite</name>
+        <info>Shows a previously hidden person with the specified ID number.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>NPC-ID</name>
+                <info>The number of the person to be hidden. Can also be a variable containing the index.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x56</byte>
+        <name>showspritelevel</name>
+        <info>Shows the sprite and moves it to a specific location. Triggers a permanent change in level-scripts.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>NPC-ID</name>
+                <info>The number of the person to be shown. Can also be a variable containing the index.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>X-position</name>
+                <info>Specifies the X-position of the sprite to be moved.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Y-position</name>
+                <info>Specifies the Y-position of the sprite to be moved.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x57</byte>
+        <name>movesprite</name>
+        <info>Moves a sprite to the specified location.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>NPC-ID</name>
+                <info>The number of the person to move. Can also be a variable containing the index.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>X-position</name>
+                <info>Specifies the X-position of the sprite to be moved.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Y-position</name>
+                <info>Specifies the Y-position of the sprite to be moved.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x58</byte>
+        <name>showsprite3</name>
+        <info>Shows a sprite from an external map at specified bank.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>NPC-ID</name>
+                <info>The number of the person to be shown. Can also be a variable containing the index.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Bank</name>
+                <info>Bank of the map on which the person is located at.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Map</name>
+                <info>Map on which the person is located at.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x59</byte>
+        <name>hidesprite3</name>
+        <info>Hides a sprite from an external map at specified bank.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>NPC-ID</name>
+                <info>The number of the person to be hidden. Can also be a variable containing the index.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Bank</name>
+                <info>Bank of the map on which the person is located at.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Map</name>
+                <info>Map on which the person is located at.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x5A</byte>
+        <name>faceplayer</name>
+        <info>Faces the latestly asked person to the player.</info>
+    </command>
+    <command>
+        <byte>0x5B</byte>
+        <name>spriteface</name>
+        <info>Changes the facing of the sprite. FACE_XXXX macroes are accepted by this function.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>NPC-ID</name>
+                <info>The number of the person to be changed. Can also be a variable containing the index.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Facing</name>
+                <info>Can be FACE_XXXX macroes or their numeric representations.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x5C</byte>
+        <name>trainerbattle</name>
+        <info>Starts a trainerbattle. Not all pointers are used, check out the user manuel for documentation.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Type</name>
+                <info>The type of the trainerbattle. Most common: 0x0 for single-trainer battle.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Index</name>
+                <info>The index of the trainer to battle.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Flag</name>
+                <info>Mostly set to 0x0. Set to 0x3 addition to type 0x9 (Oak's battle!)</info>
+            </param>
+            <param>
+                <type>pointer</type>
+                <name>Intro</name>
+                <info>Offset of text containing the intro string.</info>
+            </param>
+            <param>
+                <type>pointer</type>
+                <name>Outro</name>
+                <info>Offset of text containing the winning message.</info>
+            </param>
+            <param>
+                <type>pointer</type>
+                <name>Misc1</name>
+                <info>Can have different roles. Either unused, text or continuation. Check out the user manual.</info>
+            </param>
+            <param>
+                <type>pointer</type>
+                <name>Misc2</name>
+                <info>Can have different roles. Either unused, text or continuation. Check out the user manual.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x5D</byte>
+        <name>repeattrainerbattle</name>
+        <info>Starts a trainer battle, given by RAM information. Basically starts the last battle again.</info>
+    </command>
+    <command>
+        <byte>0x5E</byte>
+        <name>trainerbattlesuppressintro</name>
+        <info>Suppresses the intro message of the following trainerbattle command.</info>
+    </command>
+    <command>
+        <byte>0x5F</byte>
+        <name>trainerbattlesuppressoutro</name>
+        <info>Suppresses the outro message of the following trainerbattle command.</info>
+    </command>
+    <command>
+        <byte>0x60</byte>
+        <name>checktrainerflag</name>
+        <info>Determines whether the given trainer has already been defeated. 0x800D will contain 1, if they are.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Trainer</name>
+                <info>Trainer must be either 0x500 + TrainerID or a variable containing it.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x61</byte>
+        <name>cleartrainerflag</name>
+        <info>Declares the specified trainer as DEFEATED.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Trainer</name>
+                <info>Trainer must be either 0x500 + TrainerID or a variable containing it.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x62</byte>
+        <name>settrainerflag</name>
+        <info>Declares the specified trainer as NOT DEFEATED.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Trainer</name>
+                <info>Trainer must be either 0x500 + TrainerID or a variable containing it.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x63</byte>
+        <name>movespritelevel</name>
+        <info>Moves the sprite to a specified location. Triggers a permanent change in level-scripts.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>NPC-ID</name>
+                <info>The number of the person to move. Can also be a variable containing the index.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>X-position</name>
+                <info>Specifies the X-position of the sprite to be moved.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Y-position</name>
+                <info>Specifies the Y-position of the sprite to be moved.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x64</byte>
+        <name>moveoffscreen</name>
+        <info>Moves the specified sprite out of sight (one tile above the top-left corner).</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>NPC-ID</name>
+                <info>The number of the person to move. Can also be a variable containing the index.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x65</byte>
+        <name>spritebehave</name>
+        <info>Changes the movement behaviour of the sprite. Triggers a permanent change in level-scripts.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>NPC-ID</name>
+                <info>The number of the person to move. Can also be a variable containing the index.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Movement</name>
+                <info>Movement behaviour. For a complete list of them, check out the user manual.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x66</byte>
+        <name>waitmsg</name>
+        <info>Waits for the box opened by SHOWMSG to fully render.</info>
+    </command>
+    <command>
+        <byte>0x67</byte>
+        <name>showmsg</name>
+        <info>Displays a MSGBOX of type 0x6, but does not pause script execution.</info>
+        <params>
+            <param>
+                <type>textpointer</type>
+                <name>Text</name>
+                <info>Can be either a pointer to a text or 0x3000F14 (script bank 0, taking text pointer from there).</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x68</byte>
+        <name>closemsg</name>
+        <info>Closes the box opened by SHOWMSG on any key-press.</info>
+    </command>
+    <command>
+        <byte>0x69</byte>
+        <name>lockall</name>
+        <info>Freezes all people that are in the current view.</info>
+    </command>
+    <command>
+        <byte>0x6A</byte>
+        <name>lock</name>
+        <info>Freezes the person that the player is currently talking to.</info>
+    </command>
+    <command>
+        <byte>0x6B</byte>
+        <name>releaseall</name>
+        <info>Resumes movements for all people in the current view. Also closes any message box.</info>
+    </command>
+    <command>
+        <byte>0x6C</byte>
+        <name>release</name>
+        <info>Resumes movement for the person the player was talking to.</info>
+    </command>
+    <command>
+        <byte>0x6D</byte>
+        <name>waitkeypress</name>
+        <info>Pauses the script execution until the player presses a key.</info>
+    </command>
+    <command>
+        <byte>0x6E</byte>
+        <name>yesnobox</name>
+        <info>Displays a YES/NO choice-box at the specified coordinates. 0x800D will contain 1, if YES was clicked.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>X-position</name>
+                <info>Position measured in blocks (8x8), not in pixels!</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Y-position</name>
+                <info>Position measured in blocks (8x8), not in pixels!</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x6F</byte>
+        <name>multichoice</name>
+        <info>Displays a multichoice-box at the specified coordinates. 0x800D will either contain the zero-based index of the selection, or 0x7F if B was pressed.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>X-position</name>
+                <info>Position measured in blocks (8x8), not in pixels!</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Y-position</name>
+                <info>Position measured in blocks (8x8), not in pixels!</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>List index</name>
+                <info>Index of the multichoice in the multichoice-table.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Key-B</name>
+                <info>If 0x1 or higher, player can exit choice-box via the key "B".</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x70</byte>
+        <name>multichoice2</name>
+        <info>Does the same as MULTICHOICE but also predetermines the inital cursor position.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>X-position</name>
+                <info>Position measured in blocks (8x8), not in pixels!</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Y-position</name>
+                <info>Position measured in blocks (8x8), not in pixels!</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>List index</name>
+                <info>Index of the multichoice in the multichoice-table.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Initial index</name>
+                <info>Initial cursor index position within the box.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Key-B</name>
+                <info>If 0x1 or higher, player can exit choice-box via the key "B".</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x71</byte>
+        <name>multichoice3</name>
+        <info>Does the same as MULTICHOICE but splits up the entries to multiple rows.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>X-position</name>
+                <info>Position measured in blocks (8x8), not in pixels!</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Y-position</name>
+                <info>Position measured in blocks (8x8), not in pixels!</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>List index</name>
+                <info>Index of the multichoice in the multichoice-table.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Items per row</name>
+                <info>The number of items per row. Must be dividible by option-amount without any remainder.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Key-B</name>
+                <info>If 0x1 or higher, player can exit choice-box via the key "B".</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x72</byte>
+        <name>showbox</name>
+        <info>Shows a rectangular box at given coordinates with specified size.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Left</name>
+                <info>Specifies the X-position of the box.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Top</name>
+                <info>Specifies the Y-position of the box.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Width</name>
+                <info>Specifies the width of the box.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Height</name>
+                <info>Specifies the height of the box.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x73</byte>
+        <name>hidebox</name>
+        <info>Hides a rectangular box at given coordinates with specified size.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Left</name>
+                <info>Specifies the X-position of the box.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Top</name>
+                <info>Specifies the Y-position of the box.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Width</name>
+                <info>Specifies the width of the box.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Height</name>
+                <info>Specifies the height of the box.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x74</byte>
+        <name>hidebox2</name>
+        <info>Hides a part of rectangular box at given absolute coordinates with specified size.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Left</name>
+                <info>Specifies the X-position of the box.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Top</name>
+                <info>Specifies the Y-position of the box.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Width</name>
+                <info>Specifies the width of the box.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Height</name>
+                <info>Specifies the height of the box.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x75</byte>
+        <name>showpokepic</name>
+        <info>Displays a box that contains the front sprite of the specified Pokémon.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Species</name>
+                <info>Index of the Pokémon or variable containing the index.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>X-position</name>
+                <info>Measured in blocks (8x8), not in pixels!</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Y-position</name>
+                <info>Measured in blocks (8x8), not in pixels!</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x76</byte>
+        <name>hidepokepic</name>
+        <info>Hides all boxes displayed with SHOWPOKEPIC. Do not call directly after SHOWPOKEPIC.</info>
+    </command>
+    <command>
+        <byte>0x77</byte>
+        <name>showcontestwinner</name>
+        <info>R/S/E only. Displays the painting of the latest winner Pokémon in contests.</info>
+    </command>
+    <command>
+        <byte>0x78</byte>
+        <name>braille</name>
+        <info>Displays braille characters. Linebreaks can not be applied, unless using BRAILLE2. Check out the user manual.</info>
+        <params>
+            <param>
+                <type>pointer</type>
+                <name>Text</name>
+                <info>Can be either a pointer to a text or 0x3000F14 (script bank 0, taking text pointer from there).</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x79</byte>
+        <name>givepokemon</name>
+        <info>Gives the player the specified Pokémon at given level and holding given item.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Species</name>
+                <info>Index of the Pokémon to give. Can also be a variable containing the index.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Level</name>
+                <info>Non-zero level of the Pokémon.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Item</name>
+                <info>Initial item for the Pokémon to hold.</info>
+            </param>
+            <param>
+                <type>word</type>
+                <name>Unknown 1</name>
+                <info>Should be zero. Might be meant to be padding or leftovers of possible implementations.</info>
+            </param>
+            <param>
+                <type>word</type>
+                <name>Unknown 2</name>
+                <info>Should be zero. Might be meant to be padding or leftovers of possible implementations.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Unknown 3</name>
+                <info>Should be zero. Might be meant to be padding or leftovers of possible implementations.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x7A</byte>
+        <name>giveegg</name>
+        <info>Gives the player an egg of the specified Pokémon species.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Species</name>
+                <info>Specifies the index of the Pokémon.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x7B</byte>
+        <name>setpkmnpp</name>
+        <info>Sets the amount of PP for the specified Pokémon in the party.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Slot</name>
+                <info>Index of the Pokémon in the player's party.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Move</name>
+                <info>Index of the move of the selected Pokémon.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Amount</name>
+                <info>Amount of the new PP to have for this move.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x7C</byte>
+        <name>checkattack</name>
+        <info>Determines whether at least one Pokémon in the party has the specified move. 0x800D will have the zero-based index within the party or 0x6 to indicate failure.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Move</name>
+                <info>Index of the move to check for.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x7D</byte>
+        <name>bufferpokemon</name>
+        <info>Writes the name of a Pokémon to a given buffer.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Buffer</name>
+                <info>Can be either 0x0, 0x1 or 0x2.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Species</name>
+                <info>Index of the Pokémon to buffer. Can also be a variable containing the index.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x7E</byte>
+        <name>bufferfirstpokemon</name>
+        <info>Writes the name of the first party Pokémon to a given buffer.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Buffer</name>
+                <info>Can be either 0x0, 0x1 or 0x2.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x7F</byte>
+        <name>bufferpartypokemon</name>
+        <info>Writes the name of a party Pokémon to a given buffer.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Buffer</name>
+                <info>Can be either 0x0, 0x1 or 0x2.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Slot</name>
+                <info>Slot number of the Pokémon to buffer. Can also be a variable containing the index.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x80</byte>
+        <name>bufferitem</name>
+        <info>Writes the name of an item to the specified buffer. Can also be a variable.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Buffer</name>
+                <info>Can be either 0x0, 0x1 or 0x2.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Item</name>
+                <info>Index of the item to buffer. Can also be a variable.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x81</byte>
+        <name>bufferdecoration</name>
+        <info>R/S/E only. Writes the name of a deco to the specified buffer. Can also be a variable.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Buffer</name>
+                <info>Can be either 0x0, 0x1 or 0x2.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Decoration</name>
+                <info>Index of the decoration to buffer. Can also be a variable.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x82</byte>
+        <name>bufferattack</name>
+        <info>Writes the name of an attack to the specified buffer.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Buffer</name>
+                <info>Can be either 0x0, 0x1 or 0x2.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Move</name>
+                <info>Index of the move to buffer. Can also be a variable.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x83</byte>
+        <name>buffernumber</name>
+        <info>Converts the given number to a string and puts it to the specified buffer.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Buffer</name>
+                <info>Can be either 0x0, 0x1 or 0x2.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Number</name>
+                <info>Number to buffer or variable containing the number.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x84</byte>
+        <name>bufferstd</name>
+        <info>Writes a standard string to the specified buffer.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Buffer</name>
+                <info>Can be either 0x0, 0x1 or 0x2.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Standard string</name>
+                <info>Index of the standard string to buffer. Can also be a variable.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x85</byte>
+        <name>bufferstring</name>
+        <info>Writes a string located at a given offset to the specified buffer.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Buffer</name>
+                <info>Can be either 0x0, 0x1 or 0x2.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Text</name>
+                <info>Offset of the string to buffer.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x86</byte>
+        <name>pokemart</name>
+        <info>Offers a specified palette of products for sale.</info>
+        <params>
+            <param>
+                <type>itempointer</type>
+                <name>Products</name>
+                <info>A pointer to a list containing the items. Check out the user manual for a guide.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x87</byte>
+        <name>pokemart2</name>
+        <info>Offers a specified palette of products for sale.</info>
+        <params>
+            <param>
+                <type>itempointer</type>
+                <name>Products</name>
+                <info>A pointer to a list containing the items. Check out the user manual for a guide.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x88</byte>
+        <name>pokemart3</name>
+        <info>Offers a specified palette of products for sale.</info>
+        <params>
+            <param>
+                <type>itempointer</type>
+                <name>Products</name>
+                <info>A pointer to a list containing the items. Check out the user manual for a guide.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x89</byte>
+        <name>onearmedbandit</name>
+        <info>Starts the one-armed bandit game of the game corner in FR/LG and R/S/E.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Index</name>
+                <info>Index of the one-armed bandit game to use. Needs further investigation.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x8A</byte>
+        <name>cmd8a</name>
+        <info>R/S/E only. Purpose has yet to be discovered.</info>
+    </command>
+    <command>
+        <byte>0x8B</byte>
+        <name>choosecontestpkmn</name>
+        <info>R/S/E only. Prompts the player to choose a Pokémon for the contest.</info>
+    </command>
+    <command>
+        <byte>0x8C</byte>
+        <name>startcontest</name>
+        <info>R/S/E only. Starts a contest with the Pokémon specified in CHOOSECONTESTPKMN.</info>
+    </command>
+    <command>
+        <byte>0x8D</byte>
+        <name>showcontestresults</name>
+        <info>R/S/E only. Displays the results of the latest Pokémon contest.</info>
+    </command>
+    <command>
+        <byte>0x8E</byte>
+        <name>startcontestlink</name>
+        <info>R/S/E only. Starts a contest, but only with a valid wireless connection.</info>
+    </command>
+    <command>
+        <byte>0x8F</byte>
+        <name>random</name>
+        <info>Generates a random number and stores it in the variable 0x800D (LASTRESULT).</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Limit</name>
+                <info>The number will be between zero and (Limit - 1). Can also be a variable.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x90</byte>
+        <name>givemoney</name>
+        <info>Gives the specified money to the player, but only if the second argument is zero.</info>
+        <params>
+            <param>
+                <type>word</type>
+                <name>Value</name>
+                <info>Amount of cash to give to the player.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Give?</name>
+                <info>If this argument is zero, money will be given.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x91</byte>
+        <name>paymoney</name>
+        <info>Substracts the specified money from the player, but only if the second argument is zero.</info>
+        <params>
+            <param>
+                <type>word</type>
+                <name>Value</name>
+                <info>Amount of cash to remove from the player.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Give?</name>
+                <info>If this argument is zero, specified money will be removed.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x92</byte>
+        <name>checkmoney</name>
+        <info>Determines whether the player has enough money. Stores 0x1 into variable 0x800D, if they have.</info>
+        <params>
+            <param>
+                <type>word</type>
+                <name>Value</name>
+                <info>Amount of cash to check for.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Give?</name>
+                <info>If this argument is zero, specified money will be checked.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x93</byte>
+        <name>showmoney</name>
+        <info>Spawns a box showing how much money the player has at the specified position.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>X-position</name>
+                <info>X-coordinate of the box in blocks (8x8) not in pixels!</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Y-position</name>
+                <info>Y-coordinate of the box in blocks (8x8) not in pixels!</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x94</byte>
+        <name>hidemoney</name>
+        <info>Hides the money-box at the specified coordinates.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>X-position</name>
+                <info>X-coordinate of the box in blocks (8x8) not in pixels!</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Y-position</name>
+                <info>Y-coordinate of the box in blocks (8x8) not in pixels!</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x95</byte>
+        <name>updatemoney</name>
+        <info>Updates the money value in the money-box at the specified coordinates.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>X-position</name>
+                <info>X-coordinate of the box in blocks (8x8) not in pixels!</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Y-position</name>
+                <info>Y-coordinate of the box in blocks (8x8) not in pixels!</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x96</byte>
+        <name>cmd96</name>
+        <info>Purpose has yet to be discovered.</info>
+    </command>
+    <command>
+        <byte>0x97</byte>
+        <name>fadescreen</name>
+        <info>Fades the screen to black/white or vice-versa.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Fading</name>
+                <info>0x0 fades in, 0x1 fades out, 0x2 fades white in, 0x3 fades white out.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x98</byte>
+        <name>fadescreen2</name>
+        <info>Does the same as fadescreen, but after a specified delay.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Fading</name>
+                <info>0x0 fades in, 0x1 fades out, 0x2 fades white in, 0x3 fades white out.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Delay</name>
+                <info>Measured in frames. 1 second = 59,71 frames!</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x99</byte>
+        <name>darken</name>
+        <info>Executes a flash animation that makes the visible region smaller (in caves for example).</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Size</name>
+                <info>Measuring currently under investigation.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x9A</byte>
+        <name>lighten</name>
+        <info>Executes a flash animation that enlarges the visible region (in caves for example).</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Size</name>
+                <info>Measuring currently under investigation.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x9B</byte>
+        <name>showmsg2</name>
+        <info>Does the same as SHOWMSG.</info>
+        <params>
+            <param>
+                <type>pointer</type>
+                <name>Text</name>
+                <info>Can be either a pointer to a text or 0x3000F14 (script bank 0, taking text pointer from there).</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x9C</byte>
+        <name>doanimation</name>
+        <info>Executes the specified built-in animation.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Animation</name>
+                <info>Index of the animation to run. Check out the user manual for a complete list.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x9D</byte>
+        <name>setanimation</name>
+        <info>Specifies the Pokémon to use for the next animation, if needed.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Animation</name>
+                <info>Index of the animation to run. Check out the user manual for a complete list.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Slot</name>
+                <info>Index of the party Pokémon to use. Can also be a variable containing the index.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x9E</byte>
+        <name>waitanimation</name>
+        <info>Pauses script animation until the specified animation has finished.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Animation</name>
+                <info>Waits for the specified animation to finish, or zero to wait for all.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0x9F</byte>
+        <name>sethealingplace</name>
+        <info>Specifies the healing place for the player to return if their party faints.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Flightspot</name>
+                <info>A list of all the flightspots can be found in the user manual.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xA0</byte>
+        <name>checkgender</name>
+        <info>Checks the player's gender. Returns 0x0 in 0x800D (LASTRESULT) if beeing a male, 0x1 if beeing a female.</info>
+    </command>
+    <command>
+        <byte>0xA1</byte>
+        <name>cry</name>
+        <info>Plays the specified Pokémon's cry. Use WAITCRY to pause until cry finished.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Species</name>
+                <info>Index of the Pokémon to cry. Can also be a variable containing the index.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Effect</name>
+                <info>Can either be 0x0 or 0x1. 0x1 creates some kind of hall effect, but needs investigation.</info>
+            </param>
+    </params>
+    </command>
+    <command>
+        <byte>0xA2</byte>
+        <name>setmaptile</name>
+        <info>Changes the tile the specified position. Changes it permenantly when used in a level-script.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>X-position</name>
+                <info>X-coordinate in blocks (8x8), not pixels!</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Y-position</name>
+                <info>Y-coordinate in blocks (8x8), not pixels!</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Tile</name>
+                <info>The new tile-number to place at the specified position.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Movement</name>
+                <info>Does only accept 0x0 for granted movement permission and 0x1 for no permission.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xA3</byte>
+        <name>resetweather</name>
+        <info>Requests a weather change to the default weather. Can be applied using DOWEATHER.</info>
+    </command>
+    <command>
+        <byte>0xA4</byte>
+        <name>setweather</name>
+        <info>Requests a weather change to the specified weather. Can be applied using DOWEATHER.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Weather</name>
+                <info>Type of the weather. A list can be found in the user manual.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xA5</byte>
+        <name>doweather</name>
+        <info>Changes the weather requested by RESETWEATHER or SETWEATHER.</info>
+    </command>
+    <command>
+        <byte>0xA6</byte>
+        <name>tilebehave</name>
+        <info>Changes the behaviour of a tile when beeing stepped on.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Routine</name>
+                <info>Unfortunately relies fully on ASM. Picks the routine at the specified index.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xA7</byte>
+        <name>setfooter</name>
+        <info>Changes the header data of the current map. Special 0x8E must be applied afterwards to refresh the map.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Footer</name>
+                <info>Number of the footer in the table. Check out the user manual for advanced information.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xA8</byte>
+        <name>spriteheight</name>
+        <info>Changes the height of the specified sprite on the specified map.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>NPC-ID</name>
+                <info>Index of the NPC to move. Can also be a variable containing the index.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Bank</name>
+                <info>Bank of the specified map.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Map</name>
+                <info>Map on which to move the NPC.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Level</name>
+                <info>Can be found in AdvanceMap. 0x4 = water, 0xC = walking, ...</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xA9</byte>
+        <name>restoreheight</name>
+        <info>Restores the height of the specified sprite on the specified map.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>NPC-ID</name>
+                <info>Index of the NPC to move. Can also be a variable containing the index.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Bank</name>
+                <info>Bank of the specified map.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Map</name>
+                <info>Map on which to move the NPC.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xAA</byte>
+        <name>createsprite</name>
+        <info>Creates a virtual sprite for one-time use in a script, for example.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Sprite</name>
+                <info>Sprite picture number to use.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>NPC-ID</name>
+                <info>The virtual NPC identifier to use for this sprite-</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>X-coordinate</name>
+                <info>X-coordinate in blocks (8x8), not pixels!</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Y-coordinate</name>
+                <info>Y-coordinate in blocks (8x8), not pixels!</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Movement behaviour</name>
+                <info>Movement behaviour of the sprite. Check out the user manual.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Facing</name>
+                <info>One of the FACE_XXX macroes or their numeric representations.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xAB</byte>
+        <name>spritefacevirtual</name>
+        <info>Changes the facing of a virtual sprite.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>NPC-ID</name>
+                <info>The virtual NPC identifier to use for this sprite-</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Facing</name>
+                <info>One of the FACE_XXX macroes or their numeric representations.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xAC</byte>
+        <name>dooropen</name>
+        <info>Requests the opening of a door at the specified position.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>X-coordinate</name>
+                <info>X-coordinate in blocks (8x8), not pixels!</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Y-coordinate</name>
+                <info>Y-coordinate in blocks (8x8), not pixels!</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xAD</byte>
+        <name>doorclose</name>
+        <info>Requests the closing of a door at specified position.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>X-coordinate</name>
+                <info>X-coordinate in blocks (8x8), not pixels!</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Y-coordinate</name>
+                <info>Y-coordinate in blocks (8x8), not pixels!</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xAE</byte>
+        <name>doorchange</name>
+        <info>Executes the requests by DOOROPEN or DOORCLOSE.</info>
+    </command>
+    <command>
+        <byte>0xAF</byte>
+        <name>dooropen2</name>
+        <info>Requests the opening of a door at the specified position, but without animation.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>X-coordinate</name>
+                <info>X-coordinate in blocks (8x8), not pixels!</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Y-coordinate</name>
+                <info>Y-coordinate in blocks (8x8), not pixels!</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xB0</byte>
+        <name>doorclose2</name>
+        <info>Requests the closing of a door at specified position, but without animation.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>X-coordinate</name>
+                <info>X-coordinate in blocks (8x8), not pixels!</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Y-coordinate</name>
+                <info>Y-coordinate in blocks (8x8), not pixels!</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xB1</byte>
+        <name>cmdb1</name>
+        <info>R/S/E only. Purpose yet to be investigated.</info>
+    </command>
+    <command>
+        <byte>0xB2</byte>
+        <name>cmdb2</name>
+        <info>R/S/E only. Purpose yet to be investigated.</info>
+    </command>
+    <command>
+        <byte>0xB3</byte>
+        <name>countcoins</name>
+        <info>Counts the player's coins and stores it in the given variable.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Variable</name>
+                <info>Will contain the amount of coins.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xB4</byte>
+        <name>givecoins</name>
+        <info>Gives a specified quantity of coins.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Amount</name>
+                <info>Amount of coins to give.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xB5</byte>
+        <name>paycoins</name>
+        <info>Removes a specified quantity of coins.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Amount</name>
+                <info>Amount of coins to remove.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xB6</byte>
+        <name>setwildbattle</name>
+        <info>Prepares a wild battle. Start it with DOWILDBATTLE.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Species</name>
+                <info>Pokémon to battle against.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Level</name>
+                <info>Level of the opponent Pokémon.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Item</name>
+                <info>Item that the opponent Pokémon holds.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xB7</byte>
+        <name>dowildbattle</name>
+        <info>Executes a wild battle. Returns state of the battle; read user manual.</info>
+    </command>
+    <command>
+        <byte>0xC0</byte>
+        <name>showcoins</name>
+        <info>Shows a box that shows how many coins the player has.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>X-position</name>
+                <info>X-position in blocks (8x8), not pixels!</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Y-position</name>
+                <info>Y-position in blocks (8x8), not pixels!</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xC1</byte>
+        <name>hidecoins</name>
+        <info>Hides a coins-box. Arguments are not used which indicates that only ONE box can be shown at the same time.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>X-position</name>
+                <info>Not used!</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Y-position</name>
+                <info>Not used!</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xC2</byte>
+        <name>updatecoins</name>
+        <info>Updates the currently visible coins-box.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>X-position</name>
+                <info>X-position in blocks (8x8), not pixels!</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Y-position</name>
+                <info>Y-position in blocks (8x8), not pixels!</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xC3</byte>
+        <name>addhiddenvariable</name>
+        <info>Adds 1 to the specified hidden variable.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Hidden variable</name>
+                <info>Index of the hidden variable (e.g. 0xF for healed Pokémon).</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xC4</byte>
+        <name>warpconditional</name>
+        <info>Works just like WARP, but does not have any effect in level-scripts.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Bank</name>
+                <info>Bank of the map to warp to.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Map</name>
+                <info>Map to warp to.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Warp</name>
+                <info>Warp number to warp to. If beeing 0xFF, warps to the position specified in the following arguments.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>X position</name>
+                <info>X position to warp to. Only if WARP is 0xFF.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Y position</name>
+                <info>Y position to warp to. Only if WARP is 0xFF.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xC5</byte>
+        <name>waitcry</name>
+        <info>Pauses the script execution until the latest cry finishes playing.</info>
+    </command>
+    <command>
+        <byte>0xC6</byte>
+        <name>bufferboxname</name>
+        <info>Writes the name of the specified PC-box to the given buffer.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Buffer</name>
+                <info>0x0 for first buffer, 0x1 for second, 0x2 for third.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Box</name>
+                <info>ID number of the box-name to buffer.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xC7</byte>
+        <name>textcolor</name>
+        <info>Changes the text color of default message boxes (callstd 0x6).</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Color</name>
+                <info>0x0 for blue text, 0x1 for female, 0xFF for default and others for black.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xC8</byte>
+        <name>cmdc8</name>
+        <info>Shows a help text-box with the specified string. Needs further investigation.</info>
+        <params>
+            <param>
+                <type>pointer</type>
+                <name>Text</name>
+                <info>Specifies the offset to the text. Can also be the first script-bank.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xC9</byte>
+        <name>cmdc9</name>
+        <info>Provides clean-up after a help text-box was shown via cmdc8.</info>
+    </command>
+    <command>
+        <byte>0xCA</byte>
+        <name>msgsign</name>
+        <info>After using this command, all default message boxes (0x6) will use the sign-post frame.</info>
+    </command>
+    <command>
+        <byte>0xCB</byte>
+        <name>msgdefault</name>
+        <info>After using this command, all default message boxes (0x6) will use the default frame.</info>
+    </command>
+    <command>
+        <byte>0xCC</byte>
+        <name>comparehiddenvar</name>
+        <info>Compares the value of a hidden variable to the specified value.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Hidden variable</name>
+                <info>Index of the hidden variable to compare</info>
+            </param>
+            <param>
+                <type>word</type>
+                <name>Value</name>
+                <info>Value to compare to the hidden variable.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xCD</byte>
+        <name>setobedience</name>
+        <info>Makes the specified party Pokémon obedient.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Slot</name>
+                <info>Index of the Pokémon in the party. Can also be a variable.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xCE</byte>
+        <name>checkobedience</name>
+        <info>Determines whether the given party Pokémon is obedient. If yes, 0x1 will be writen to 0x800D (LASTRESULT).</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Slot</name>
+                <info>Index of the Pokémon in the party. Can also be a variable.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xCF</byte>
+        <name>executeram</name>
+        <info>Under certain conditions, continues script execution from the offset specified at 0x020370A4.</info>
+    </command>
+    <command>
+        <byte>0xD0</byte>
+        <name>setworldmapflag</name>
+        <info>Sets the specified worldmapflag to 1. Allows to visit that map using HM Fly.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Worldflag</name>
+                <info>The worldmapflag to set to 1, but only if a valid flying spot and byte at 0x0203ADFA greater than 0x3.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xD1</byte>
+        <name>warpteleport2</name>
+        <info>Warps to the specified bank/map at the given warp or position X/Y. Player beeing teleported.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Bank</name>
+                <info>Bank of the map to warp to.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Map</name>
+                <info>Map to warp to.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Warp</name>
+                <info>Warp number to warp to. If beeing 0xFF, warps to the position specified in the following arguments.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>X position</name>
+                <info>X position to warp to. Only if WARP is 0xFF.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Y position</name>
+                <info>Y position to warp to. Only if WARP is 0xFF.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xD2</byte>
+        <name>setcatchlocation</name>
+        <info>Changes the location of where a party Pokémon has been caught.</info>
+        <params>
+            <param>
+                <type>hword</type>
+                <name>Slot</name>
+                <info>Index of the Pokémon in the party. Can also be a variable.</info>
+            </param>
+            <param>
+                <type>byte</type>
+                <name>Location</name>
+                <info>Read the user manual to retrieve a list of valid locations.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xD3</byte>
+        <name>measurebraille</name>
+        <info>Measures the width of the braille string and stores it in variable 0x8004.</info>
+        <params>
+            <param>
+                <type>pointer</type>
+                <name>Text</name>
+                <info>The offset of the braille string to measure. Can also be the first script-bank (0x3000F14)</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xD4</byte>
+        <name>bufferitems</name>
+        <info>Does the same as BUFFERITEM, but if there are multiple items, the string is pluralized.</info>
+        <params>
+            <param>
+                <type>byte</type>
+                <name>Buffer</name>
+                <info>Can be either 0x0, 0x1 or 0x2.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Item</name>
+                <info>Index of the item to buffer. Can also be a variable.</info>
+            </param>
+            <param>
+                <type>hword</type>
+                <name>Quantity</name>
+                <info>Amount of items. Can also be a variable. If 2 or more, will be pluralized.</info>
+            </param>
+        </params>
+    </command>
+    <command>
+        <byte>0xD5</byte>
+        <name>cmdd5</name>
+        <info>R/S/E only. Needs further investigation.</info>
+    </command>
+</commands>
+<macroes>
+    <macro>
+        <name>msgbox</name>
+        <info>Displays the specified text with given standard function.</info>
+        <format>
+            <entry>
+                <command>setbank</command>
+                <param>
+                    <type>fixed</type>
+                    <value>0x0</value>
+                </param>
+                <param>
+                    <type>dynamic</type>
+                    <index>0x0</index>
+                    <name>Text</name>
+                    <info>Offset of the text to display.</info>
+                </param>
+            </entry>
+            <entry>
+                <command>callstd</command>
+                <param>
+                    <type>dynamic</type>
+                    <index>0x1</index>
+                    <name>Type</name>
+                    <info>Type of the box. Check out the user manual for all types.</info>
+                </param>
+            </entry>
+        </format>
+    </macro>
+    <macro>
+        <name>giveitem</name>
+        <info>Gives an item, shows a message and plays a fanfare. Used for normal scripts.</info>
+        <format>
+            <entry>
+                <command>setvar</command>
+                <param>
+                    <type>fixed</type>
+                    <value>0x8000</value>
+                </param>
+                <param>
+                    <type>dynamic</type>
+                    <index>0x0</index>
+                    <name>Item</name>
+                    <info>Index of the item to give to the player.</info>
+                </param>
+            </entry>
+            <entry>
+                <command>setvar</command>
+                <param>
+                    <type>fixed</type>
+                    <value>0x8001</value>
+                </param>
+                <param>
+                    <type>dynamic</type>
+                    <index>0x1</index>
+                    <name>Quantity</name>
+                    <info>Amount of items to give to the player.</info>
+                </param>
+            </entry>
+            <entry>
+                <command>callstd</command>
+                <param>
+                    <type>fixed</type>
+                    <value>0x0</value>
+                </param>
+            </entry>
+        </format>
+    </macro>
+    <macro>
+        <name>giveitem2</name>
+        <info>Gives an item, shows a message and plays a fanfare. Used for item NPCs.</info>
+        <format>
+            <entry>
+                <command>setvar</command>
+                <param>
+                    <type>fixed</type>
+                    <value>0x8000</value>
+                </param>
+                <param>
+                    <type>dynamic</type>
+                    <index>0x0</index>
+                    <name>Item</name>
+                    <info>Index of the item to give to the player.</info>
+                </param>
+            </entry>
+            <entry>
+                <command>setvar</command>
+                <param>
+                    <type>fixed</type>
+                    <value>0x8001</value>
+                </param>
+                <param>
+                    <type>dynamic</type>
+                    <index>0x1</index>
+                    <name>Quantity</name>
+                    <info>Amount of items to give to the player.</info>
+                </param>
+            </entry>
+            <entry>
+                <command>callstd</command>
+                <param>
+                    <type>fixed</type>
+                    <value>0x1</value>
+                </param>
+            </entry>
+        </format>
+    </macro>
+</macroes>
+</document>
