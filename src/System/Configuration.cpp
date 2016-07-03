@@ -451,6 +451,24 @@ namespace ase
         }
     }
 
+    ///////////////////////////////////////////////////////////
+    // Function type:  I/O
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
+    void Configuration::dispose()
+    {
+        foreach (const QList<Command *> &cmdList, m_Commands)
+            foreach (Command *cmd, cmdList)
+                delete cmd;
+
+        foreach (const QList<Macro *> &macroList, m_Macroes)
+            foreach (Macro *macro, macroList)
+                delete macro;
+    }
+
 
     ///////////////////////////////////////////////////////////
     // Function type:  Getter

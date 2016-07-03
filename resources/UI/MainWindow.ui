@@ -19,6 +19,12 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">QStatusBar#statusBar
+{
+	border-top: 1px solid #B9B9B9;
+}</string>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <property name="sizePolicy">
     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -73,10 +79,14 @@ QTabBar::close-button:hover
 QTabBar::close-button:pressed
 {
 	image: url(:/images/tab_close_press.png);
+}
+
+QTabWidget:pane
+{
 }</string>
       </property>
       <property name="documentMode">
-       <bool>true</bool>
+       <bool>false</bool>
       </property>
       <property name="tabsClosable">
        <bool>true</bool>
@@ -102,6 +112,21 @@ QTabBar::close-button:pressed
         <height>401</height>
        </size>
       </property>
+      <property name="styleSheet">
+       <string notr="true">QTreeWidget
+{
+	border: 1px solid #909090;
+	border-top: none;
+	border-right: none;
+	border-bottom: none;
+}</string>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::NoFrame</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Plain</enum>
+      </property>
       <attribute name="headerVisible">
        <bool>false</bool>
       </attribute>
@@ -120,8 +145,10 @@ QTabBar::close-button:pressed
       <property name="styleSheet">
        <string notr="true">QPlainTextEdit#plainTextEdit
 {
-	border: 1px solid #909090;
+	border-top: 1px solid #B9B9B9;
+	border-right: 1px solid #909090;
 	border-left: none;
+	border-bottom: none;
 }
 
 QPlainTextEdit#plainTextEdit

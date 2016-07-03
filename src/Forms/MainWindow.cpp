@@ -44,6 +44,15 @@
 namespace ase
 {
     ///////////////////////////////////////////////////////////
+    // Action pointer objects
+    //
+    ///////////////////////////////////////////////////////////
+    QAction *s_ActionDecompile;
+    QAction *s_ActionCommand;
+    QAction *s_ActionLabel;
+
+
+    ///////////////////////////////////////////////////////////
     // Function type:  Constructor
     // Contributors:   Pokedude
     // Last edit by:   Pokedude
@@ -52,10 +61,74 @@ namespace ase
     ///////////////////////////////////////////////////////////
     MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent),
-        ui(new Ui::MainWindow)
+        ui(new Ui::MainWindow),
+        m_PrevTab(-1)
     {
         ui->setupUi(this);
+        setupCommands();
+        setupAdvanced();
+    }
 
+
+    ///////////////////////////////////////////////////////////
+    // Function type:  Destructor
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
+    MainWindow::~MainWindow()
+    {
+        Configuration::dispose();
+
+        delete ui;
+        if (m_Rom.info().isLoaded())
+            m_Rom.close();
+    }
+
+
+    ///////////////////////////////////////////////////////////
+    // Function type:  Internal
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
+    void MainWindow::setupAdvanced()
+    {
+        m_DecompileBox = new ASEHexBox;
+        m_CommandBox = new QComboBox;
+        m_FileLabel = new QLabel;
+
+        m_DecompileBox->setMaximumWidth(100);
+        m_DecompileBox->setMaximumHeight(22);
+        m_CommandBox->setFixedWidth(150);
+        m_CommandBox->setMaximumHeight(22);
+        m_CommandBox->setFixedHeight(22);
+        m_CommandBox->setObjectName("m_CommandBox");
+        m_DecompileBox->setMaxLength(7);
+        m_DecompileBox->setContentsMargins(4, 0, 8, 0);
+        m_CommandBox->setEditable(true);
+        m_CommandBox->addItems(Configuration::getFileNames());
+        m_CommandBox->setItemDelegate(new QStyledItemDelegate);
+        m_FileLabel->setText("Command file: ");
+        m_FileLabel->setContentsMargins(4, 0, 0, 0);
+
+        s_ActionDecompile = ui->mainToolBar->insertWidget(ui->actionDecompile, m_DecompileBox);
+        s_ActionCommand = ui->mainToolBar->insertWidget(ui->actionOpen_2, m_CommandBox);
+        s_ActionLabel = ui->mainToolBar->insertWidget(s_ActionCommand, m_FileLabel);
+        ui->mainToolBar->insertSeparator(ui->actionOpen_2);
+    }
+
+    ///////////////////////////////////////////////////////////
+    // Function type:  Internal
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
+    void MainWindow::setupCommands()
+    {
         Configuration::read();
         auto commands = Configuration::getCommands(0);
         auto macroes = Configuration::getMacroes(0);
@@ -93,18 +166,5 @@ namespace ase
         ui->plainTextEdit->setPreprocessor(preproc);
         ui->plainTextEdit->setMacroFunctions(macroFunctions);
         ui->plainTextEdit->setMacroFunctionInfos(macroInfos);
-    }
-
-
-    ///////////////////////////////////////////////////////////
-    // Function type:  Destructor
-    // Contributors:   Pokedude
-    // Last edit by:   Pokedude
-    // Date of edit:   7/3/2016
-    //
-    ///////////////////////////////////////////////////////////
-    MainWindow::~MainWindow()
-    {
-        delete ui;
     }
 }

@@ -36,6 +36,7 @@
 //
 ///////////////////////////////////////////////////////////
 #include <ASE/Forms/MainWindow.h>
+#include <ASE/Widgets/Misc/StyleSheets.hpp>
 #include <QApplication>
 
 
@@ -52,8 +53,12 @@
 int main(int argc, char *argv[])
 {
     qputenv("QT_AUTO_SCREEN_SCALE_FACTOR", "1");
+
+    QString sheet(ase::StyleSheets::loadSheet("ASEApplication"));
     QApplication a(argc, argv);
     ase::MainWindow w;
+
+    a.setStyleSheet(sheet);
     w.show();
 
     return a.exec();

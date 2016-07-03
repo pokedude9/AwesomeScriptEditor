@@ -39,6 +39,8 @@
 // Include files
 //
 ///////////////////////////////////////////////////////////
+#include <ASE/Widgets/ASEHexBox.hpp>
+#include <QBoy/Core/Rom.hpp>
 #include <QMainWindow>
 #include <QtWidgets>
 
@@ -81,13 +83,45 @@ namespace ase
         ~MainWindow();
 
 
+    protected:
+
+        ///////////////////////////////////////////////////////////
+        /// \brief Programmatically creates widgets.
+        ///
+        ///////////////////////////////////////////////////////////
+        void setupAdvanced();
+
+        ///////////////////////////////////////////////////////////
+        /// \brief Sets up everything related to the commands.
+        ///
+        ///////////////////////////////////////////////////////////
+        void setupCommands();
+
+        ///////////////////////////////////////////////////////////
+        /// \brief Sets up the GUI after loading a ROM.
+        ///
+        ///////////////////////////////////////////////////////////
+        void setupAfterRom();
+
+        ///////////////////////////////////////////////////////////
+        /// \brief Resets the GUI to default (no ROM loaded).
+        ///
+        ///////////////////////////////////////////////////////////
+        void resetUi();
+
+
     private:
 
         ///////////////////////////////////////////////////////////
         // Class members
         //
         ///////////////////////////////////////////////////////////
-        Ui::MainWindow *ui;
+        Ui::MainWindow  *ui;
+        ASEHexBox       *m_DecompileBox;
+        QComboBox       *m_CommandBox;
+        QLabel          *m_FileLabel;
+        qboy::Rom        m_Rom;
+        Int32            m_PrevTab;
     };
 }
 
