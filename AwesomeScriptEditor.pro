@@ -65,7 +65,16 @@ SOURCES += \
     src/Parser/MacroFixedParam.cpp \
     src/Parser/MacroDynamicParam.cpp \
     src/Parser/MacroEntry.cpp \
-    src/Parser/Macro.cpp
+    src/Parser/Macro.cpp \
+    src/Scripting/ScriptBlock.cpp \
+    src/Scripting/Blocks/FunctionBlock.cpp \
+    src/Scripting/Blocks/ItemBlock.cpp \
+    src/Scripting/Blocks/MoveBlock.cpp \
+    src/Scripting/Blocks/StringBlock.cpp \
+    src/Text/String.cpp \
+    src/Text/Tables.cpp \
+    src/Scripting/ASEScript.cpp \
+    src/Scripting/Decompiler.cpp
 
 
 #
@@ -89,7 +98,16 @@ HEADERS  += \
     include/ASE/Parser/MacroFixedParam.hpp \
     include/ASE/Parser/MacroDynamicParam.hpp \
     include/ASE/Parser/MacroEntry.hpp \
-    include/ASE/Parser/Macro.hpp
+    include/ASE/Parser/Macro.hpp \
+    include/ASE/Scripting/ScriptBlock.hpp \
+    include/ASE/Scripting/Blocks/FunctionBlock.hpp \
+    include/ASE/Scripting/Blocks/ItemBlock.hpp \
+    include/ASE/Scripting/Blocks/MoveBlock.hpp \
+    include/ASE/Scripting/Blocks/StringBlock.hpp \
+    include/ASE/Text/String.hpp \
+    include/ASE/Text/Tables.hpp \
+    include/ASE/Scripting/ASEScript.hpp \
+    include/ASE/Scripting/Decompiler.hpp
 
 
 #
@@ -104,3 +122,9 @@ FORMS    += \
 #
 RESOURCES += \
     resources/ASE.qrc
+
+DISTFILES += \
+    resources/config/BPRE.xml \
+    resources/config/Script.Default.xml \
+    resources/config/AXVE.xml \
+    resources/config/BPEE.xml

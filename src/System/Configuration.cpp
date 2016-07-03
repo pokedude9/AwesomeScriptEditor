@@ -61,6 +61,7 @@ namespace ase
     QStringList                 Configuration::m_FileNames;
     Int32                       Configuration::m_Count = 0;
     Int32                       Configuration::m_Active = 0;
+    BaseROMType                 Configuration::RomType = RT_RS;
 
 
     ///////////////////////////////////////////////////////////

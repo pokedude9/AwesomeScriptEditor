@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>656</width>
-    <height>476</height>
+    <width>800</width>
+    <height>600</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>600</width>
+    <height>400</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
@@ -33,7 +39,10 @@
     <property name="bottomMargin">
      <number>0</number>
     </property>
-    <property name="spacing">
+    <property name="horizontalSpacing">
+     <number>10</number>
+    </property>
+    <property name="verticalSpacing">
      <number>0</number>
     </property>
     <item row="0" column="0">
@@ -111,8 +120,8 @@ QTabBar::close-button:pressed
       <property name="styleSheet">
        <string notr="true">QPlainTextEdit#plainTextEdit
 {
-	border-top: 1px solid #909090;
-	border-bottom: 1px solid #909090;
+	border: 1px solid #909090;
+	border-left: none;
 }
 
 QPlainTextEdit#plainTextEdit
@@ -135,7 +144,7 @@ QPlainTextEdit#plainTextEdit
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>656</width>
+     <width>800</width>
      <height>21</height>
     </rect>
    </property>

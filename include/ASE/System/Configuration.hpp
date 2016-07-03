@@ -46,6 +46,18 @@
 namespace ase
 {
     ///////////////////////////////////////////////////////////
+    // Struct: BaseROMType
+    //
+    ///////////////////////////////////////////////////////////
+    enum BaseROMType
+    {
+        RT_RS   =  0,
+        RT_FRLG =  1,
+        RT_EM   =  2
+    };
+
+
+    ///////////////////////////////////////////////////////////
     /// \file    MacroParam.hpp
     /// \author  Pokedude
     /// \version 1.0.0.0
@@ -164,6 +176,10 @@ namespace ase
         static const QList<Macro *> findMacroByCmd(const Command *cmd);
 
 
+        ///////////////////////////////////////////////////////////
+        static BaseROMType RomType; ///< Holds the current ROM type
+
+
     private:
 
         ///////////////////////////////////////////////////////////
@@ -176,6 +192,11 @@ namespace ase
         static Int32                       m_Count;
         static Int32                       m_Active;
     };
+
+
+    ///////////////////////////////////////////////////////////
+    #define CONFIG(x)           (ase::Configuration::x)
+
 }
 
 
