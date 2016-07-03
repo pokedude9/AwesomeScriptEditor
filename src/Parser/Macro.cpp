@@ -35,6 +35,7 @@
 // Include files
 //
 ///////////////////////////////////////////////////////////
+#include <ASE/System/Configuration.hpp>
 #include <ASE/Parser/Macro.hpp>
 
 
@@ -179,7 +180,7 @@ namespace ase
     // Date of edit:   7/3/2016
     //
     ///////////////////////////////////////////////////////////
-    const QString Macro::read(const Rom &rom) const
+    const QString Macro::read(const qboy::Rom &rom) const
     {
         // Defines the starting sequence of the macro
         QString macroString(m_Name);

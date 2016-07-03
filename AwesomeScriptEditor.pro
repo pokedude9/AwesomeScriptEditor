@@ -8,7 +8,7 @@
 #
 # QMake Settings, 1
 #
-QT       += core gui widgets
+QT         += xml core gui widgets
 TARGET      = AwesomeScriptEditor
 TEMPLATE    = app
 CONFIG     += c++11

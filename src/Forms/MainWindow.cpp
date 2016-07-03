@@ -35,6 +35,7 @@
 // Include files
 //
 ///////////////////////////////////////////////////////////
+#include <ASE/System/Configuration.hpp>
 #include <ASE/Forms/MainWindow.h>
 #include "ui_MainWindow.h"
 
@@ -53,6 +54,44 @@ namespace ase
         ui(new Ui::MainWindow)
     {
         ui->setupUi(this);
+
+        Configuration::read();
+        auto commands = Configuration::getCommands(0);
+        auto macroes = Configuration::getMacroes(0);
+        const QStringList preproc =
+        {
+            "org",
+            "define",
+            "include",
+            "item",
+            "move",
+            "byte",
+            "hword",
+            "word",
+            "pointer"
+        };
+
+        QStringList functionNames;
+        QStringList functionInfos;
+        QStringList macroFunctions;
+        QStringList macroInfos;
+
+        foreach (Command *cmd, commands)
+        {
+            functionNames.push_back(cmd->name());
+            functionInfos.push_back(cmd->info());
+        }
+        foreach (Macro *macro, macroes)
+        {
+            macroFunctions.push_back(macro->name());
+            macroInfos.push_back(macro->info());
+        }
+
+        ui->plainTextEdit->setFunctions(functionNames);
+        ui->plainTextEdit->setFunctionInfos(functionInfos);
+        ui->plainTextEdit->setPreprocessor(preproc);
+        ui->plainTextEdit->setMacroFunctions(macroFunctions);
+        ui->plainTextEdit->setMacroFunctionInfos(macroInfos);
     }
 
 

@@ -178,7 +178,7 @@ namespace ase
     // Date of edit:   7/3/2016
     //
     ///////////////////////////////////////////////////////////
-    const QString Command::read(const Rom &rom) const
+    const QString Command::read(const qboy::Rom &rom) const
     {
         // Appends the name, to begin with
         QString commandString(m_Name);

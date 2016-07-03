@@ -120,9 +120,7 @@ namespace ase
     ///////////////////////////////////////////////////////////
     void ASEEditorHighlighter::highlightBlock(const QString &text)
     {
-        //
         // Highlights decimal and hexadecimal numbers through regex
-        //
         QRegularExpressionMatch match;
         QRegularExpression regex("(\\b\\d+\\b)|(\\b0[xX][0-9a-fA-F]+\\b)");
         QRegularExpressionMatchIterator iter = regex.globalMatch(text);
@@ -134,9 +132,7 @@ namespace ase
         }
 
 
-        //
         // Highlights single-line commands through regex
-        //
         regex.setPattern("(\\/\\/)+.*");
         match = regex.match(text);
         if (match.hasMatch())
@@ -146,9 +142,7 @@ namespace ase
         }
 
 
-        //
         // Highlights dynamic pointers that point to sub-sections in the script
-        //
         if (m_UseXSE)
         {
             regex.setPattern("(^|\\s)@\\w+(\\s|$)");
@@ -173,9 +167,7 @@ namespace ase
         }
 
 
-        //
         // Highlights Pokémon text through regex
-        //
         regex.setPattern("^=\\s.*$");
         match = regex.match(text);
         if (match.hasMatch())
@@ -185,12 +177,15 @@ namespace ase
         }
 
 
-        //
         // Highlights the only preprocessor (if existing) in this line
-        //
         if (!m_Preprocessor.isEmpty())
         {
-            QString pattern(QString("^#(") + m_Preprocessor.at(0));
+            QString pattern;
+            if (m_UseXSE)
+                pattern = (QString("^#(") + m_Preprocessor.at(0));
+            else
+                pattern = (QString("^\\.(") + m_Preprocessor.at(0));
+
             foreach (QString directive, m_Preprocessor)
                 pattern.append(QString("|") + directive);
 
@@ -205,9 +200,7 @@ namespace ase
         }
 
 
-        //
         // Highlights possible macro directives in this line
-        //
         if (!m_Macroes.isEmpty())
         {
             QString pattern = QString("^#(") + m_Macroes.at(0);

@@ -41,6 +41,7 @@
 ///////////////////////////////////////////////////////////
 #include <QBoy/Config.hpp>
 #include <ASE/Parser/MacroParam.hpp>
+#include <QString>
 
 
 namespace ase
