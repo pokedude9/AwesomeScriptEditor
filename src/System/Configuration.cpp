@@ -62,6 +62,7 @@ namespace ase
     Int32                       Configuration::m_Count = 0;
     Int32                       Configuration::m_Active = 0;
     BaseROMType                 Configuration::RomType = RT_RS;
+    BaseLanguage                Configuration::Language = BL_ASE;
 
 
     ///////////////////////////////////////////////////////////

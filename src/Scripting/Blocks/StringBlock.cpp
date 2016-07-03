@@ -36,6 +36,7 @@
 //
 ///////////////////////////////////////////////////////////
 #include <ASE/Scripting/Blocks/StringBlock.hpp>
+#include <ASE/System/Configuration.hpp>
 #include <ASE/Text/String.hpp>
 
 
@@ -65,13 +66,26 @@ namespace ase
     {
         if (!rom.seek(m_Offset))
         {
+            QString prefix;
+            if (CONFIG(Language) == BL_XSE)
+                prefix = "#";
+            else
+                prefix = ".";
+
             // Generates an error if failing to read data within the block
-            QString firstLine = QString("// #org 0x") + QString::number(m_Offset, 16).toUpper();
+            QString firstLine = QString("// " + prefix + "org 0x") + QString::number(m_Offset, 16).toUpper();
             QString secondLine = QString("\n// Error: Tried to read data beyond ROM bounds.");
             return firstLine + secondLine;
         }
 
-        QString pokeString(QString("#org 0x") + QString::number(m_Offset, 16).toUpper());
+
+        QString pokeString;
+        if (CONFIG(Language) == BL_XSE)
+            pokeString.append(QString("#org 0x") + QString::number(m_Offset, 16).toUpper());
+        else
+            pokeString.append(QString(".org 0x") + QString::number(m_Offset, 16).toUpper() + QString(":"));
+
+
         pokeString.append(QString("\n= ") + String::read(rom, m_Offset));
         return pokeString;
     }

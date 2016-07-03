@@ -184,6 +184,8 @@ namespace ase
     {
         // Defines the starting sequence of the macro
         QString macroString(m_Name);
+        if (CONFIG(Language) == BL_ASE) // identation
+            macroString.insert(0, "    ");
 
         // Goes through every command parameter and appends the dynamic ones
         int commandPosition = 0;

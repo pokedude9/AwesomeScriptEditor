@@ -36,6 +36,7 @@
 //
 ///////////////////////////////////////////////////////////
 #include <ASE/Scripting/Blocks/MoveBlock.hpp>
+#include <ASE/System/Configuration.hpp>
 
 
 namespace ase
@@ -64,20 +65,33 @@ namespace ase
     {
         if (!rom.seek(m_Offset))
         {
+            QString prefix;
+            if (CONFIG(Language) == BL_XSE)
+                prefix = "#";
+            else
+                prefix = ".";
+
             // Generates an error if failing to read data within the block
-            QString firstLine = QString("// #org 0x") + QString::number(m_Offset, 16).toUpper();
+            QString firstLine = QString("// " + prefix + "org 0x") + QString::number(m_Offset, 16).toUpper();
             QString secondLine = QString("\n// Error: Tried to read data beyond ROM bounds.");
             return firstLine + secondLine;
         }
 
 
-        QString moveString = QString("#org 0x") + QString::number(m_Offset, 16).toUpper();
+        QString moveString;
+        if (CONFIG(Language) == BL_XSE)
+            moveString.append(QString("#org 0x") + QString::number(m_Offset, 16).toUpper());
+        else
+            moveString.append(QString(".org 0x") + QString::number(m_Offset, 16).toUpper() + QString(":"));
 
         // Reads move data until the terminator 0xFE was read
         while (true)
         {
             UInt8 move = rom.readByte();
-            moveString.append(QString("\n#move 0x") + QString::number(move, 16).toUpper());
+            if (CONFIG(Language) == BL_XSE)
+                moveString.append(QString("\n#move 0x") + QString::number(move, 16).toUpper());
+            else
+                moveString.append(QString("\n.move 0x") + QString::number(move, 16).toUpper());
 
             if (move == TERMINATOR_MOVE)
                 break;

@@ -36,6 +36,7 @@
 //
 ///////////////////////////////////////////////////////////
 #include <ASE/Parser/Command.hpp>
+#include <ASE/System/Configuration.hpp>
 
 
 namespace ase
@@ -182,6 +183,9 @@ namespace ase
     {
         // Appends the name, to begin with
         QString commandString(m_Name);
+        if (CONFIG(Language) == BL_ASE) // indentation
+            commandString.insert(0, "    ");
+
         Boolean isSpecial = m_Name.contains("{");
 
         // Then appends all the parameters

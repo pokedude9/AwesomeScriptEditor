@@ -112,17 +112,17 @@ namespace ase
         QString full;
         if (!stringsHigh.isEmpty())
         {
-            full += "//\n// Functions (" + QString::number(stringsHigh.size()) + ")\n//\n";
+            full += "////////////////////////////////////////\n// Functions (" + QString::number(stringsHigh.size()) + ")\n//\n////////////////////////////////////////\n";
             full += stringsHigh.join(QByteArray("\n\n")).toStdString().c_str();
         }
         if (!stringsMed.isEmpty())
         {
-            full += "\n\n\n//\n// String data (" + QString::number(stringsMed.size()) + ")\n//\n";
+            full += "\n\n\n////////////////////////////////////////\n// String data (" + QString::number(stringsMed.size()) + ")\n//\n////////////////////////////////////////\n";
             full += stringsMed.join(QByteArray("\n\n")).toStdString().c_str();
         }
         if (!stringsLow.isEmpty())
         {
-            full += "\n\n\n//\n// Miscellaneous data (" + QString::number(stringsLow.size()) + ")\n//\n";
+            full += "\n\n\n////////////////////////////////////////\n// Miscellaneous data (" + QString::number(stringsLow.size()) + ")\n//\n////////////////////////////////////////\n";
             full += stringsLow.join(QByteArray("\n\n")).toStdString().c_str();
         }
 

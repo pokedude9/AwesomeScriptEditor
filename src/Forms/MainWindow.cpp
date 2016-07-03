@@ -37,6 +37,7 @@
 ///////////////////////////////////////////////////////////
 #include <ASE/System/Configuration.hpp>
 #include <ASE/Forms/MainWindow.h>
+#include <ASE/Scripting/Decompiler.hpp>
 #include "ui_MainWindow.h"
 
 

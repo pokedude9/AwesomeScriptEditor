@@ -36,6 +36,7 @@
 //
 ///////////////////////////////////////////////////////////
 #include <ASE/Scripting/Blocks/ItemBlock.hpp>
+#include <ASE/System/Configuration.hpp>
 
 
 namespace ase
@@ -64,20 +65,33 @@ namespace ase
     {
         if (!rom.seek(m_Offset))
         {
+            QString prefix;
+            if (CONFIG(Language) == BL_XSE)
+                prefix = "#";
+            else
+                prefix = ".";
+
             // Generates an error if failing to read data within the block
-            QString firstLine = QString("// #org 0x") + QString::number(m_Offset, 16).toUpper();
+            QString firstLine = QString("// " + prefix + "org 0x") + QString::number(m_Offset, 16).toUpper();
             QString secondLine = QString("\n// Error: Tried to read data beyond ROM bounds.");
             return firstLine + secondLine;
         }
 
 
-        QString itemString = QString("#org 0x") + QString::number(m_Offset, 16).toUpper();
+        QString itemString;
+        if (CONFIG(Language) == BL_XSE)
+            itemString.append(QString("#org 0x") + QString::number(m_Offset, 16).toUpper());
+        else
+            itemString.append(QString(".org 0x") + QString::number(m_Offset, 16).toUpper() + QString(":"));
 
         // Reads half-words until the terminator 0x0 was read
         while (true)
         {
             UInt16 item = rom.readHWord();
-            itemString.append(QString("\n#item 0x") + QString::number(item, 16).toUpper());
+            if (CONFIG(Language) == BL_XSE)
+                itemString.append(QString("\n#item 0x") + QString::number(item, 16).toUpper());
+            else
+               itemString.append(QString("\n.item 0x") + QString::number(item, 16).toUpper());
 
             if (item == TERMINATOR_ITEM)
                 break;

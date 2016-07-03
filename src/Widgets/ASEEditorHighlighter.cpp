@@ -208,9 +208,9 @@ namespace ase
         if (!m_Preprocessor.isEmpty())
         {
             if (m_UseXSE)
-                pattern = (QString("^#(") + m_Preprocessor.at(0));
+                pattern = (QString("(^|\\s)#(") + m_Preprocessor.at(0));
             else
-                pattern = (QString("^\\.(") + m_Preprocessor.at(0));
+                pattern = (QString("(^|\\s)\\.(") + m_Preprocessor.at(0));
 
             foreach (QString directive, m_Preprocessor)
                 pattern.append(QString("|") + directive);

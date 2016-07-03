@@ -56,6 +56,16 @@ namespace ase
         RT_EM   =  2
     };
 
+    ///////////////////////////////////////////////////////////
+    // Struct: BaseLanguage
+    //
+    ///////////////////////////////////////////////////////////
+    enum BaseLanguage
+    {
+        BL_XSE  = 0,
+        BL_ASE  = 1
+    };
+
 
     ///////////////////////////////////////////////////////////
     /// \file    MacroParam.hpp
@@ -176,8 +186,9 @@ namespace ase
         static const QList<Macro *> findMacroByCmd(const Command *cmd);
 
 
-        ///////////////////////////////////////////////////////////
-        static BaseROMType RomType; ///< Holds the current ROM type
+        //////////////////////////////////////////////////////////////////////
+        static BaseROMType RomType;     ///< Holds the current ROM type
+        static BaseLanguage Language;   ///< Holds the current script language
 
 
     private:

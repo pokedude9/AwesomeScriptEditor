@@ -63,11 +63,17 @@ namespace ase
     ///////////////////////////////////////////////////////////
     const QString FunctionBlock::readData(const qboy::Rom &rom)
     {
-        QString scriptString(QString("#org 0x") + QString::number(m_Offset, 16).toUpper());
+        QString scriptString;
+        if (CONFIG(Language) == BL_XSE)
+            scriptString.append(QString("#org 0x") + QString::number(m_Offset, 16).toUpper());
+        else
+            scriptString.append(QString(".org 0x") + QString::number(m_Offset, 16).toUpper() + QString(":"));
+
 
         // Determines whether the data offset is in ROM range
         if (!rom.seek(m_Offset))
             goto error;
+
 
         // Loops until one of the function terminators were found
         while (true)
@@ -82,7 +88,10 @@ namespace ase
             if (cmd == NULL)
             {
                 // Command not existing, append raw byte data
-                scriptString.append(QString("\n#byte 0x") + QString::number(commandByte, 16).toUpper());
+                if (CONFIG(Language) == BL_XSE)
+                    scriptString.append(QString("\n#byte 0x") + QString::number(commandByte, 16).toUpper());
+                else
+                    scriptString.append(QString("\n.byte 0x") + QString::number(commandByte, 16).toUpper());
                 continue;
             }
 
@@ -147,8 +156,14 @@ namespace ase
 
     error:
 
+        QString prefix;
+        if (CONFIG(Language) == BL_XSE)
+            prefix = "#";
+        else
+            prefix = ".";
+
         // Generates an error if failing to read data within the block
-        QString firstLine = QString("// #org 0x") + QString::number(m_Offset, 16).toUpper();
+        QString firstLine = QString("// " + prefix + "org 0x") + QString::number(m_Offset, 16).toUpper();
         QString secondLine = QString("\n// Error: Tried to read data beyond ROM bounds.");
         return firstLine + secondLine;
     }
