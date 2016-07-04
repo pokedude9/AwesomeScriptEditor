@@ -159,9 +159,8 @@ namespace ase
         void doneValidating(const QList<NotifyEntry> e);
         void executeValidating();
         void on_actionReal_time_script_validator_triggered();
-
-
         void on_actionCloseDebugger_triggered();
+
 
     private:
 
@@ -175,6 +174,7 @@ namespace ase
         QLabel          *m_FileLabel;
         RTValidator     *m_Validator;
         QTimer          *m_Timer;
+        QIcon            m_ErrorIcons[2];
         qboy::Rom        m_Rom;
         Int32            m_PrevTab;
     };

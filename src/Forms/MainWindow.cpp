@@ -129,11 +129,13 @@ namespace ase
         QWidget *spacer = new QWidget();
         spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
         ui->errorToolBar->insertWidget(ui->actionCloseDebugger, spacer);
-
         ui->mainToolBar->insertSeparator(ui->actionOpen_2);
-        ui->splitter->setSizes({ 600-124, 124 });
-        ui->tableWidget->setColumnWidth(0, 24);
+        ui->splitter->setSizes({ 600-164, 164 });
+        ui->tableWidget->setColumnWidth(0, 32);
         ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+
+        m_ErrorIcons[0] = QIcon(":/images/script_warning");
+        m_ErrorIcons[1] = QIcon(":/images/script_error");
 
         m_Timer->setInterval(1000);
         ui->plainTextEdit->installEventFilter(this);
@@ -375,31 +377,34 @@ namespace ase
     ///////////////////////////////////////////////////////////
     bool MainWindow::eventFilter(QObject *watched, QEvent *event)
     {
-        if (watched->objectName() == "plainTextEdit")
+        if (ui->actionReal_time_script_validator->isChecked())
         {
-            if (event->type() == QEvent::FocusIn)
+            if (watched->objectName() == "plainTextEdit")
             {
-                // Editor in focus, start RT validator
-                m_Timer->start();
-            }
-            else if (event->type() == QEvent::FocusOut)
-            {
-                m_Timer->stop();
-                m_Validator->stop();
-            }
-            else if (event->type() == QEvent::KeyPress)
-            {
-                // Do not debug while typing
-                m_Timer->stop();
-            }
-            else if (event->type() == QEvent::KeyRelease)
-            {
-                // Debug after stopping to type
-                // Should immediately update when deleting something
-                if (((QKeyEvent *)event)->key() == Qt::Key_Backspace)
-                    executeValidating();
+                if (event->type() == QEvent::FocusIn)
+                {
+                    // Editor in focus, start RT validator
+                    m_Timer->start();
+                }
+                else if (event->type() == QEvent::FocusOut)
+                {
+                    m_Timer->stop();
+                    m_Validator->stop();
+                }
+                else if (event->type() == QEvent::KeyPress)
+                {
+                    // Do not debug while typing
+                    m_Timer->stop();
+                }
+                else if (event->type() == QEvent::KeyRelease)
+                {
+                    // Debug after stopping to type
+                    // Should immediately update when deleting something
+                    if (((QKeyEvent *)event)->key() == Qt::Key_Backspace)
+                        executeValidating();
 
-                m_Timer->start();
+                    m_Timer->start();
+                }
             }
         }
 
@@ -433,22 +438,35 @@ namespace ase
 
         // Clears the old table except for header
         ui->tableWidget->setUpdatesEnabled(false);
-        for (int i = ui->tableWidget->rowCount(); i > 0; i--)
+        for (int i = ui->tableWidget->rowCount(); i >= 0; i--)
             ui->tableWidget->removeRow(i);
 
         // Sets up the table
+        ui->tableWidget->setRowCount(e.size());
         for (int i = 0; i < e.size(); i++)
         {
-            QTableWidgetItem type, line, msg;
+            QTableWidgetItem *type = new QTableWidgetItem;
+            QTableWidgetItem *line = new QTableWidgetItem;
+            QTableWidgetItem *msg = new QTableWidgetItem;
+            line->setTextAlignment(Qt::AlignCenter);
+            msg->setTextAlignment(Qt::AlignCenter);
+            line->setText(QString::number(e.at(i).line));
+            msg->setText(e.at(i).msg);
+
+            if (e.at(i).type == NT_Warning)
+                type->setIcon(m_ErrorIcons[0]);
+            else
+                type->setIcon(m_ErrorIcons[1]);
 
 
-            ui->tableWidget->insertRow(i+1);
-            ui->tableWidget->setItem(i+1, 0, NULL);
-            ui->tableWidget->setItem(i+1, 1, NULL);
-            ui->tableWidget->setItem(i+1, 2, NULL);
+            ui->tableWidget->insertRow(i);
+            ui->tableWidget->setItem(i, 0, type);
+            ui->tableWidget->setItem(i, 1, line);
+            ui->tableWidget->setItem(i, 2, msg);
         }
 
         ui->tableWidget->setUpdatesEnabled(true);
+        ui->tableWidget->repaint();
     }
 
     ///////////////////////////////////////////////////////////
@@ -731,7 +749,11 @@ namespace ase
         if (ui->actionReal_time_script_validator->isChecked())
             ui->frame->setVisible(true);
         else
+        {
             ui->frame->setVisible(false);
+            ui->plainTextEdit->setErrors(QList<NotifyEntry>());
+            m_Validator->stop();
+        }
     }
 
     ///////////////////////////////////////////////////////////
@@ -744,5 +766,6 @@ namespace ase
     void MainWindow::on_actionCloseDebugger_triggered()
     {
         ui->actionReal_time_script_validator->setChecked(false);
+        on_actionReal_time_script_validator_triggered();
     }
 }
