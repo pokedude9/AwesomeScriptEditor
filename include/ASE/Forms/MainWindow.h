@@ -40,6 +40,7 @@
 //
 ///////////////////////////////////////////////////////////
 #include <ASE/Widgets/ASEHexBox.hpp>
+#include <ASE/System/RTValidator.hpp>
 #include <QBoy/Core/Rom.hpp>
 #include <QMainWindow>
 #include <QtWidgets>
@@ -95,6 +96,14 @@ namespace ase
         void showEvent(QShowEvent *event);
 
         ///////////////////////////////////////////////////////////
+        /// \brief Intercepts various widget events.
+        /// \param watched Object containing the event
+        /// \param event Event fired
+        ///
+        ///////////////////////////////////////////////////////////
+        bool eventFilter(QObject *watched, QEvent *event);
+
+        ///////////////////////////////////////////////////////////
         /// \brief Programmatically creates widgets.
         ///
         ///////////////////////////////////////////////////////////
@@ -147,7 +156,12 @@ namespace ase
         void on_actionPaste_triggered();
         void on_actionDelete_triggered();
         void on_actionSelect_All_triggered();
+        void doneValidating(const QList<NotifyEntry> e);
+        void executeValidating();
+        void on_actionReal_time_script_validator_triggered();
 
+
+        void on_actionCloseDebugger_triggered();
 
     private:
 
@@ -159,6 +173,8 @@ namespace ase
         ASEHexBox       *m_DecompileBox;
         QComboBox       *m_CommandBox;
         QLabel          *m_FileLabel;
+        RTValidator     *m_Validator;
+        QTimer          *m_Timer;
         qboy::Rom        m_Rom;
         Int32            m_PrevTab;
     };

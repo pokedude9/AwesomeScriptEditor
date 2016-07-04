@@ -36,6 +36,7 @@
 //
 ///////////////////////////////////////////////////////////
 #include <ASE/System/Configuration.hpp>
+#include <ASE/System/RTValidator.hpp>
 #include <ASE/Forms/MainWindow.h>
 #include <ASE/Widgets/Misc/Messages.hpp>
 #include <ASE/Scripting/Decompiler.hpp>
@@ -83,6 +84,9 @@ namespace ase
         Configuration::dispose();
 
         delete ui;
+        delete m_Timer;
+        delete m_Validator;
+
         if (m_Rom.info().isLoaded())
             m_Rom.close();
     }
@@ -100,6 +104,8 @@ namespace ase
         m_DecompileBox = new ASEHexBox;
         m_CommandBox = new QComboBox;
         m_FileLabel = new QLabel;
+        m_Timer = new QTimer;
+        m_Validator = new RTValidator(ui->plainTextEdit);
 
         m_DecompileBox->setMaximumWidth(100);
         m_DecompileBox->setMaximumHeight(22);
@@ -119,7 +125,20 @@ namespace ase
         s_ActionDecompile = ui->mainToolBar->insertWidget(ui->actionDecompile, m_DecompileBox);
         s_ActionCommand = ui->mainToolBar->insertWidget(ui->actionOpen_2, m_CommandBox);
         s_ActionLabel = ui->mainToolBar->insertWidget(s_ActionCommand, m_FileLabel);
+
+        QWidget *spacer = new QWidget();
+        spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        ui->errorToolBar->insertWidget(ui->actionCloseDebugger, spacer);
+
         ui->mainToolBar->insertSeparator(ui->actionOpen_2);
+        ui->splitter->setSizes({ 600-124, 124 });
+        ui->tableWidget->setColumnWidth(0, 24);
+        ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+
+        m_Timer->setInterval(1000);
+        ui->plainTextEdit->installEventFilter(this);
+        connect(m_Validator->worker(), SIGNAL(finished(QList<NotifyEntry>)), this, SLOT(doneValidating(QList<NotifyEntry>)));
+        connect(m_Timer, SIGNAL(timeout()), this, SLOT(executeValidating()));
     }
 
     ///////////////////////////////////////////////////////////
@@ -347,6 +366,90 @@ namespace ase
         }
     }
 
+    ///////////////////////////////////////////////////////////
+    // Function type:  Virtual
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
+    bool MainWindow::eventFilter(QObject *watched, QEvent *event)
+    {
+        if (watched->objectName() == "plainTextEdit")
+        {
+            if (event->type() == QEvent::FocusIn)
+            {
+                // Editor in focus, start RT validator
+                m_Timer->start();
+            }
+            else if (event->type() == QEvent::FocusOut)
+            {
+                m_Timer->stop();
+                m_Validator->stop();
+            }
+            else if (event->type() == QEvent::KeyPress)
+            {
+                // Do not debug while typing
+                m_Timer->stop();
+            }
+            else if (event->type() == QEvent::KeyRelease)
+            {
+                // Debug after stopping to type
+                // Should immediately update when deleting something
+                if (((QKeyEvent *)event)->key() == Qt::Key_Backspace)
+                    executeValidating();
+
+                m_Timer->start();
+            }
+        }
+
+
+        return QMainWindow::eventFilter(watched, event);
+    }
+
+
+    ///////////////////////////////////////////////////////////
+    // Function type:  Slot
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
+    void MainWindow::executeValidating()
+    {
+        m_Validator->start();
+    }
+
+    ///////////////////////////////////////////////////////////
+    // Function type:  Slot
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
+    void MainWindow::doneValidating(const QList<NotifyEntry> e)
+    {
+        ui->plainTextEdit->setErrors(e);
+
+        // Clears the old table except for header
+        ui->tableWidget->setUpdatesEnabled(false);
+        for (int i = ui->tableWidget->rowCount(); i > 0; i--)
+            ui->tableWidget->removeRow(i);
+
+        // Sets up the table
+        for (int i = 0; i < e.size(); i++)
+        {
+            QTableWidgetItem type, line, msg;
+
+
+            ui->tableWidget->insertRow(i+1);
+            ui->tableWidget->setItem(i+1, 0, NULL);
+            ui->tableWidget->setItem(i+1, 1, NULL);
+            ui->tableWidget->setItem(i+1, 2, NULL);
+        }
+
+        ui->tableWidget->setUpdatesEnabled(true);
+    }
 
     ///////////////////////////////////////////////////////////
     // Function type:  Slot
@@ -614,5 +717,32 @@ namespace ase
     ///////////////////////////////////////////////////////////
     void MainWindow::on_actionSave_ROM_triggered()
     {
+    }
+
+    ///////////////////////////////////////////////////////////
+    // Function type:  Slot
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
+    void MainWindow::on_actionReal_time_script_validator_triggered()
+    {
+        if (ui->actionReal_time_script_validator->isChecked())
+            ui->frame->setVisible(true);
+        else
+            ui->frame->setVisible(false);
+    }
+
+    ///////////////////////////////////////////////////////////
+    // Function type:  Slot
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
+    void MainWindow::on_actionCloseDebugger_triggered()
+    {
+        ui->actionReal_time_script_validator->setChecked(false);
     }
 }

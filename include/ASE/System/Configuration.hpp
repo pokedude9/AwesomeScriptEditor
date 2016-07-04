@@ -185,6 +185,15 @@ namespace ase
         ///////////////////////////////////////////////////////////
         static const QList<Macro *> findMacroByCmd(const Command *cmd);
 
+        ///////////////////////////////////////////////////////////
+        /// \brief Finds a macro by it's name.
+        ///
+        /// Note: The active command file will be used for searching.
+        /// Change the active index via "setActive" to change this.
+        ///
+        ///////////////////////////////////////////////////////////
+        static const Macro *findMacroByName(const QString &name);
+
 
         //////////////////////////////////////////////////////////////////////
         static BaseROMType RomType;     ///< Holds the current ROM type

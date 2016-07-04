@@ -20,5 +20,10 @@
         <file>css/ASEEditorPopup.css</file>
         <file>css/ASEEditorPopup2.css</file>
         <file>css/ASEEditorPopupLabel.css</file>
+        <file>images/table_delete.png</file>
+        <file>images/table_save.png</file>
+        <file>images/close_misc.png</file>
+        <file>images/script_error.png</file>
+        <file>images/script_warning.png</file>
     </qresource>
 </RCC>

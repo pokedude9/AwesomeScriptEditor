@@ -31,98 +31,80 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-#ifndef __ASE_EDITORHIGHLIGHTER_HPP__
-#define __ASE_EDITORHIGHLIGHTER_HPP__
+#ifndef __ASE_RTVALIDATOR_HPP__
+#define __ASE_RTVALIDATOR_HPP__
 
 
 ///////////////////////////////////////////////////////////
 // Include files
 //
 ///////////////////////////////////////////////////////////
-#include <QSyntaxHighlighter>
-#include <QTextDocument>
+#include <ASE/Widgets/ASEEditor.hpp>
+#include <ASE/System/RTWorker.hpp>
+#include <QThread>
 
 
 namespace ase
 {
     ///////////////////////////////////////////////////////////
-    /// \file    ASEEditorHighlighter.hpp
+    /// \file    RTValidator.hpp
     /// \author  Pokedude
     /// \version 1.0.0.0
     /// \date    7/3/2016
-    /// \brief   Highlights functions, macroes and other.
+    /// \brief   Debugs the current script in a different thread.
     ///
-    /// Additionally, highlights numbers, pointers and
-    /// strings that are braille or Pokémon strings.
+    /// Loops through all the script file lines and searches
+    /// for possible errors.
     ///
     ///////////////////////////////////////////////////////////
-    class ASEEditorHighlighter : public QSyntaxHighlighter {
+    class RTValidator : public QObject {
+    Q_OBJECT
     public:
 
         ///////////////////////////////////////////////////////////
         /// \brief Default constructor
         ///
-        /// Initializes a new instance of ase::ASEEditorHighlighter.
-        /// Sets the specified QTextDocument as it's parent.
+        /// Initializes a new instance of ase::RTValidator.
         ///
         ///////////////////////////////////////////////////////////
-        ASEEditorHighlighter(QTextDocument *parent);
+        RTValidator(ASEEditor *editor);
 
         ///////////////////////////////////////////////////////////
         /// \brief Destructor
         ///
-        /// Releases all resources used by ase::ASEEditorHighligther.
+        /// Terminates the thread and destroys all used resources.
         ///
         ///////////////////////////////////////////////////////////
-        ~ASEEditorHighlighter();
+        ~RTValidator();
 
 
         ///////////////////////////////////////////////////////////
-        /// \brief Sets the preprocessors for this ase::ASEEEditor.
-        ///
-        /// The preprocessor directives are fixed for all
-        /// configuration files and will be highlighted by
-        /// the underlying QSyntaxHighlighter.
-        ///
-        /// \param preprocessors List of preprocessor directives
+        /// \brief Starts the real-time debugger.
         ///
         ///////////////////////////////////////////////////////////
-        void setPreprocessor(const QStringList &preprocessor);
+        void start();
 
         ///////////////////////////////////////////////////////////
-        /// \brief Adds some macroes for this ase::ASEEditor.
-        ///
-        /// The macroes may differ between every script-file,
-        /// but there are predefined macroes for items or moves
-        /// that are loaded by the configuration parser.
-        ///
-        /// \params macroes List of macroes
+        /// \brief Stops the real-time debugger.
         ///
         ///////////////////////////////////////////////////////////
-        void setMacroes(const QStringList &macroes);
-
-        ///////////////////////////////////////////////////////////
-        /// \brief Determines the current script language.
-        ///
-        /// XSE and ASE differ concerning many coding guidelines,
-        /// thus they evaluate to different highlighting code.
-        ///
-        /// \param useXse True if using XSE language
-        ///
-        ///////////////////////////////////////////////////////////
-        void setLanguage(bool useXse);
+        void stop();
 
 
-    protected:
+        ///////////////////////////////////////////////////////////
+        /// \brief Retrieves the worker and it's signals.
+        ///
+        ///////////////////////////////////////////////////////////
+        RTWorker *worker() const;
+
+
+    signals:
 
         ///////////////////////////////////////////////////////////
-        /// \brief Highlights symbols in the current line.
-        ///
-        /// Highlights numbers, pointers and strings. Additionally
-        /// highlights possible functions, macroes and directives.
+        /// \brief Emits the worker debug function.
         ///
         ///////////////////////////////////////////////////////////
-        void highlightBlock(const QString &text) Q_DECL_OVERRIDE;
+        void validate(const QString code);
 
 
     private:
@@ -131,18 +113,11 @@ namespace ase
         // Class members
         //
         ///////////////////////////////////////////////////////////
-        QStringList     m_Macroes;      ///< Contains all the macroes
-        QStringList     m_Preprocessor; ///< Contains the preprocessor
-        QColor          m_ClrMacro;     ///< Color of the macro strings
-        QColor          m_ClrNumber;    ///< Color of the numbers
-        QColor          m_ClrComment;   ///< Color of the comments
-        QColor          m_ClrDirective; ///< Color of the directives
-        QColor          m_ClrPointer;   ///< Color of the pointers
-        QColor          m_ClrPokeText;  ///< Color of the strings
-        QFont           m_FntError;     ///< Font of the errors
-        bool            m_UseXSE;       ///< Use XSE langauge?
+        ASEEditor           *m_Editor;
+        RTWorker            *m_Worker;
+        QThread             *m_Thread;
     };
 }
 
 
-#endif //__ASE_EDITORHIGHLIGHTER_HPP__
+#endif  // __ASE_RTVALIDATOR_HPP__

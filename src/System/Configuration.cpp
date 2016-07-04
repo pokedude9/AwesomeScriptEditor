@@ -617,4 +617,20 @@ namespace ase
         // Returns the possible macroes. List might have size zero.
         return macroes;
     }
+
+    ///////////////////////////////////////////////////////////
+    // Function type:  Getter
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
+    const Macro *Configuration::findMacroByName(const QString &name)
+    {
+        for (int i = 0; i < activeMacroes().size(); i++)
+            if (activeMacroes().at(i)->name() == name)
+                return activeMacroes().at(i);
+
+        return NULL;
+    }
 }

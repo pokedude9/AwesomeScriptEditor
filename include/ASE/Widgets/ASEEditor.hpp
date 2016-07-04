@@ -39,6 +39,7 @@
 // Include files
 //
 ///////////////////////////////////////////////////////////
+#include <ASE/System/RTWorker.hpp>
 #include <QtGui/QtGui>
 #include <QtWidgets>
 
@@ -175,6 +176,12 @@ namespace ase
         ///////////////////////////////////////////////////////////
         void setMacroes(const QStringList &macroes);
 
+        ///////////////////////////////////////////////////////////
+        /// \brief Specifies the error for the current document.
+        ///
+        ///////////////////////////////////////////////////////////
+        void setErrors(const QList<NotifyEntry> &e);
+
 
         ///////////////////////////////////////////////////////////
         /// \brief Paints the line widget's contents.
@@ -280,6 +287,7 @@ namespace ase
         // Class members
         //
         ///////////////////////////////////////////////////////////
+        QList<NotifyEntry>          m_Errors;
         ASEEditorPopup             *m_Popup;
         ASEEditorHighlighter       *m_Highlighter;
         ASEEditorLineWidget        *m_LineWidget;

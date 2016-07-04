@@ -244,6 +244,19 @@ namespace ase
     // Date of edit:   7/3/2016
     //
     ///////////////////////////////////////////////////////////
+    void ASEEditor::setErrors(const QList<NotifyEntry> &e)
+    {
+        m_Errors = e;
+        repaint();
+    }
+
+    ///////////////////////////////////////////////////////////
+    // Function type:  Setter
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
     void ASEEditor::setPreprocessor(const QStringList &preprocessor)
     {
         m_Highlighter->setPreprocessor(preprocessor);

@@ -12,8 +12,8 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>600</width>
-    <height>400</height>
+    <width>800</width>
+    <height>600</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -44,9 +44,6 @@
     </property>
     <property name="bottomMargin">
      <number>0</number>
-    </property>
-    <property name="horizontalSpacing">
-     <number>10</number>
     </property>
     <property name="verticalSpacing">
      <number>0</number>
@@ -141,9 +138,25 @@ QTabWidget:pane
      </widget>
     </item>
     <item row="1" column="0">
-     <widget class="ase::ASEEditor" name="plainTextEdit">
-      <property name="styleSheet">
-       <string notr="true">QPlainTextEdit#plainTextEdit
+     <widget class="QSplitter" name="splitter">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="handleWidth">
+       <number>0</number>
+      </property>
+      <property name="childrenCollapsible">
+       <bool>false</bool>
+      </property>
+      <widget class="ase::ASEEditor" name="plainTextEdit">
+       <property name="minimumSize">
+        <size>
+         <width>610</width>
+         <height>150</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPlainTextEdit#plainTextEdit
 {
 	border-top: 1px solid #B9B9B9;
 	border-right: 1px solid #909090;
@@ -155,13 +168,154 @@ QPlainTextEdit#plainTextEdit
 {
 	background-color: #FFFFFF;
 }</string>
-      </property>
-      <property name="lineWrapMode">
-       <enum>QPlainTextEdit::NoWrap</enum>
-      </property>
-      <property name="tabStopWidth">
-       <number>40</number>
-      </property>
+       </property>
+       <property name="lineWrapMode">
+        <enum>QPlainTextEdit::NoWrap</enum>
+       </property>
+       <property name="tabStopWidth">
+        <number>40</number>
+       </property>
+      </widget>
+      <widget class="QFrame" name="frame">
+       <property name="minimumSize">
+        <size>
+         <width>610</width>
+         <height>100</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QFrame#frame
+{
+	border-top: 1px solid #b9b9b9;
+	border-right: 1px solid #909090;
+	background-color: white;
+}</string>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Plain</enum>
+       </property>
+       <property name="lineWidth">
+        <number>0</number>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QToolBar" name="errorToolBar">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>34</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QToolBar#errorToolBar
+{
+    background-color: #e9e9e9;
+	border-bottom: 1px solid #b9b9b9;
+}</string>
+          </property>
+          <addaction name="actionClearTable"/>
+          <addaction name="actionSaveTable"/>
+          <addaction name="actionCloseDebugger"/>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTableWidget" name="tableWidget">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
+          <property name="lineWidth">
+           <number>0</number>
+          </property>
+          <property name="sortingEnabled">
+           <bool>true</bool>
+          </property>
+          <property name="rowCount">
+           <number>0</number>
+          </property>
+          <property name="columnCount">
+           <number>3</number>
+          </property>
+          <attribute name="horizontalHeaderVisible">
+           <bool>true</bool>
+          </attribute>
+          <attribute name="horizontalHeaderCascadingSectionResizes">
+           <bool>false</bool>
+          </attribute>
+          <attribute name="horizontalHeaderDefaultSectionSize">
+           <number>50</number>
+          </attribute>
+          <attribute name="horizontalHeaderHighlightSections">
+           <bool>true</bool>
+          </attribute>
+          <attribute name="horizontalHeaderMinimumSectionSize">
+           <number>20</number>
+          </attribute>
+          <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+           <bool>true</bool>
+          </attribute>
+          <attribute name="horizontalHeaderStretchLastSection">
+           <bool>true</bool>
+          </attribute>
+          <attribute name="verticalHeaderVisible">
+           <bool>false</bool>
+          </attribute>
+          <attribute name="verticalHeaderDefaultSectionSize">
+           <number>20</number>
+          </attribute>
+          <attribute name="verticalHeaderMinimumSectionSize">
+           <number>20</number>
+          </attribute>
+          <attribute name="verticalHeaderShowSortIndicator" stdset="0">
+           <bool>false</bool>
+          </attribute>
+          <attribute name="verticalHeaderStretchLastSection">
+           <bool>false</bool>
+          </attribute>
+          <column>
+           <property name="text">
+            <string/>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Line</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Message</string>
+           </property>
+           <property name="font">
+            <font>
+             <strikeout>false</strikeout>
+            </font>
+           </property>
+          </column>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -235,10 +389,17 @@ QPlainTextEdit#plainTextEdit
     <addaction name="actionHelp"/>
     <addaction name="actionAbout"/>
    </widget>
+   <widget class="QMenu" name="menuSettings">
+    <property name="title">
+     <string>Settings</string>
+    </property>
+    <addaction name="actionReal_time_script_validator"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuProject"/>
    <addaction name="menuTools"/>
+   <addaction name="menuSettings"/>
    <addaction name="menu"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
@@ -475,6 +636,44 @@ QPlainTextEdit#plainTextEdit
    <property name="icon">
     <iconset resource="../ASE.qrc">
      <normaloff>:/images/toolbar_level.png</normaloff>:/images/toolbar_level.png</iconset>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </action>
+  <action name="actionReal_time_script_validator">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Real-time script validator</string>
+   </property>
+  </action>
+  <action name="actionClearTable">
+   <property name="icon">
+    <iconset resource="../ASE.qrc">
+     <normaloff>:/images/table_delete.png</normaloff>:/images/table_delete.png</iconset>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </action>
+  <action name="actionSaveTable">
+   <property name="icon">
+    <iconset resource="../ASE.qrc">
+     <normaloff>:/images/table_save.png</normaloff>:/images/table_save.png</iconset>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </action>
+  <action name="actionCloseDebugger">
+   <property name="icon">
+    <iconset resource="../ASE.qrc">
+     <normaloff>:/images/close_misc.png</normaloff>:/images/close_misc.png</iconset>
    </property>
    <property name="text">
     <string/>

@@ -74,7 +74,9 @@ SOURCES += \
     src/Text/String.cpp \
     src/Text/Tables.cpp \
     src/Scripting/ASEScript.cpp \
-    src/Scripting/Decompiler.cpp
+    src/Scripting/Decompiler.cpp \
+    src/System/RTValidator.cpp \
+    src/System/RTWorker.cpp
 
 
 #
@@ -107,7 +109,10 @@ HEADERS  += \
     include/ASE/Text/String.hpp \
     include/ASE/Text/Tables.hpp \
     include/ASE/Scripting/ASEScript.hpp \
-    include/ASE/Scripting/Decompiler.hpp
+    include/ASE/Scripting/Decompiler.hpp \
+    include/ASE/System/RTWorker.hpp \
+    include/ASE/System/RTValidator.hpp \
+    include/ASE/System/RTErrors.hpp
 
 
 #

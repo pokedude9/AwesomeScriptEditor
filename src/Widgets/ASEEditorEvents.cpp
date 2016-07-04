@@ -52,6 +52,30 @@ namespace ase
     void ASEEditor::paintEvent(QPaintEvent *event)
     {
         QPlainTextEdit::paintEvent(event);
+        QPainter painter(viewport());
+        painter.setPen(0xFF0030);
+
+
+        // Underlines each erroneous line
+        foreach (NotifyEntry e, m_Errors)
+        {
+            QTextBlock line = document()->findBlockByLineNumber(e.line);
+            QString text = line.text().split('\n')[0];
+            Int32 posY = (fontMetrics().height() * e.line) + 3;
+            size_t posX = text.toStdString().find_first_not_of(' ');
+            if (posX == std::string::npos)
+                continue;
+
+
+            // Paints the line
+            posX += (posX * fontMetrics().width(' ') + 4);
+            posY += fontMetrics().height();
+            painter.drawLine(posX, posY, posX + fontMetrics().width(text.trimmed()), posY);
+        }
+
+
+        // Finished painting
+        painter.end();
     }
 
     ///////////////////////////////////////////////////////////

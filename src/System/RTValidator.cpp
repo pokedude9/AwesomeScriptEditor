@@ -35,7 +35,7 @@
 // Include files
 //
 ///////////////////////////////////////////////////////////
-#include <ASE/Parser/Parameter.hpp>
+#include <ASE/System/RTValidator.hpp>
 
 
 namespace ase
@@ -47,10 +47,68 @@ namespace ase
     // Date of edit:   7/3/2016
     //
     ///////////////////////////////////////////////////////////
-    Parameter::Parameter()
-        : m_Name(QString::null),
-          m_Info(QString::null)
+    RTValidator::RTValidator(ASEEditor *editor)
+        : QObject(editor)
     {
+        m_Editor = editor;
+        m_Thread = new QThread;
+        m_Worker = new RTWorker;
+        m_Worker->moveToThread(m_Thread);    
+        connect(this, SIGNAL(validate(QString)), m_Worker, SLOT(debug(QString)));
+        qRegisterMetaType<QList<NotifyEntry>>("QList<NotifyEntry>");
+        m_Thread->start();
+    }
+
+    ///////////////////////////////////////////////////////////
+    // Function type:  Destructor
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
+    RTValidator::~RTValidator()
+    {
+        if (m_Thread->isRunning())
+            m_Thread->terminate();
+
+        delete m_Thread;
+    }
+
+
+    ///////////////////////////////////////////////////////////
+    // Function type:  I/O
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
+    void RTValidator::start()
+    {
+        if (m_Worker->isRunning())
+        {
+            // Previous operation appearantly not finished;
+            // must wait for next interval
+            return;
+        }
+
+
+        emit validate(m_Editor->toPlainText());
+    }
+
+    ///////////////////////////////////////////////////////////
+    // Function type:  I/O
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   7/3/2016
+    //
+    ///////////////////////////////////////////////////////////
+    void RTValidator::stop()
+    {
+        if (m_Worker->isRunning())
+        {
+            // Requests a stop
+            m_Worker->interrupt();
+        }
     }
 
 
@@ -61,82 +119,8 @@ namespace ase
     // Date of edit:   7/3/2016
     //
     ///////////////////////////////////////////////////////////
-    ParameterType Parameter::type() const
+    RTWorker *RTValidator::worker() const
     {
-        return m_Type;
+        return m_Worker;
     }
-
-    ///////////////////////////////////////////////////////////
-    // Function type:  Getter
-    // Contributors:   Pokedude
-    // Last edit by:   Pokedude
-    // Date of edit:   7/3/2016
-    //
-    ///////////////////////////////////////////////////////////
-    const QString &Parameter::name() const
-    {
-        return m_Name;
-    }
-
-    ///////////////////////////////////////////////////////////
-    // Function type:  Getter
-    // Contributors:   Pokedude
-    // Last edit by:   Pokedude
-    // Date of edit:   7/3/2016
-    //
-    ///////////////////////////////////////////////////////////
-    const QString &Parameter::info() const
-    {
-        return m_Info;
-    }
-
-
-    ///////////////////////////////////////////////////////////
-    // Function type:  Setter
-    // Contributors:   Pokedude
-    // Last edit by:   Pokedude
-    // Date of edit:   7/3/2016
-    //
-    ///////////////////////////////////////////////////////////
-    void Parameter::setType(ParameterType type)
-    {
-        m_Type = type;
-    }
-
-    ///////////////////////////////////////////////////////////
-    // Function type:  Setter
-    // Contributors:   Pokedude
-    // Last edit by:   Pokedude
-    // Date of edit:   7/3/2016
-    //
-    ///////////////////////////////////////////////////////////
-    void Parameter::setName(const QString &name)
-    {
-        m_Name = name;
-    }
-
-    ///////////////////////////////////////////////////////////
-    // Function type:  Setter
-    // Contributors:   Pokedude
-    // Last edit by:   Pokedude
-    // Date of edit:   7/3/2016
-    //
-    ///////////////////////////////////////////////////////////
-    void Parameter::setInfo(const QString &info)
-    {
-        m_Info = info;
-    }
-
-
-    ///////////////////////////////////////////////////////////
-    const char *ParamTypeStrings[7] =
-    {
-        "byte",
-        "hword",
-        "word",
-        "pointer",
-        "movement-pointer",
-        "item-pointer",
-        "string-pointer"
-    };
 }

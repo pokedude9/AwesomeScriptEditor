@@ -31,91 +31,90 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-#ifndef __ASE_PARAMETERTYPE_HPP__
-#define __ASE_PARAMETERTYPE_HPP__
+#ifndef __ASE_RTWORKER_HPP__
+#define __ASE_RTWORKER_HPP__
 
 
 ///////////////////////////////////////////////////////////
-// Defines
+// Include files
 //
 ///////////////////////////////////////////////////////////
-#define PT_BYTE_SIZE        1
-#define PT_HWORD_SIZE       2
-#define PT_WORD_SIZE        4
+#include <QMutex>
+#include <QThread>
 
 
 namespace ase
 {
     ///////////////////////////////////////////////////////////
-    /// \file    ParameterType.hpp
-    /// \author  Pokedude
-    /// \version 1.0.0.0
-    /// \date    7/3/2016
-    /// \brief   Defines possible parameter types.
-    ///
-    /// Special types like item, text and movement pointers
-    /// are treated in a specific way upon (de)compiling.
+    /// \brief Defines the notification types.
     ///
     ///////////////////////////////////////////////////////////
-    enum ParameterType
+    enum NotifyType
     {
-        PT_Byte,
-        PT_HWord,
-        PT_Word,
-        PT_Pointer,
-        PT_MovePointer,
-        PT_ItemPointer,
-        PT_StringPointer
+        NT_Error,
+        NT_Warning
     };
 
     ///////////////////////////////////////////////////////////
-    /// \brief Array of type strings; for real-time validator.
+    /// \brief Defines a notification entry.
     ///
     ///////////////////////////////////////////////////////////
-    extern const char *ParamTypeStrings[7];
-
-
-    namespace ParameterTypeHelper
+    struct NotifyEntry
     {
-        ///////////////////////////////////////////////////////////
-        /// \brief Retrieves the size of the parameter.
-        ///
-        /// Retrieves the size of the parameter in order to know
-        /// the location of the next parameter.
-        ///
-        /// \returns the size of the parameter, in bytes.
-        ///
-        ///////////////////////////////////////////////////////////
-        inline int GetParamSize(ParameterType type)
-        {
-            if (type == PT_Byte)
-                return PT_BYTE_SIZE;
-            if (type == PT_HWord)
-                return PT_HWORD_SIZE;
+        uint        line;
+        NotifyType  type;
+        QString     msg;
+    };
 
-            return PT_WORD_SIZE;
-        }
+
+    ///////////////////////////////////////////////////////////
+    /// \file    RTWorker.hpp
+    /// \author  Pokedude
+    /// \version 1.0.0.0
+    /// \date    7/3/2016
+    /// \brief   Debugs the current script in a different thread.
+    ///
+    /// Loops through all the script file lines and searches
+    /// for possible errors.
+    ///
+    ///////////////////////////////////////////////////////////
+    class RTWorker : public QObject {
+    Q_OBJECT
+    public:
 
         ///////////////////////////////////////////////////////////
-        /// \brief Retrieves the maximum value of the parameter.
-        ///
-        /// Retrieves the maximum value of the parameter in order
-        /// to know how much bytes it occupies
-        ///
-        /// \returns the maximum value of the parameter.
+        /// \brief Determines whether the function is running.
         ///
         ///////////////////////////////////////////////////////////
-        inline int GetMaxValue(ParameterType type)
-        {
-            if (type == PT_Byte)
-                return 0xFF;
-            if (type == PT_HWord)
-                return 0xFFFF;
+        bool isRunning();
 
-            return 0xFFFFFFFF;
-        }
-    }
+        ///////////////////////////////////////////////////////////
+        /// \brief Requests an abort.
+        ///
+        ///////////////////////////////////////////////////////////
+        void interrupt();
+
+
+    public slots:
+
+        ///////////////////////////////////////////////////////////
+        /// \brief Debugs the given script code.
+        /// \param code Script code to debug
+        ///
+        ///////////////////////////////////////////////////////////
+        void debug(const QString code);
+
+
+    signals:
+
+        ///////////////////////////////////////////////////////////
+        /// \brief Signals that debugging has been finished.
+        /// \param notifications Found errors and warnings
+        ///
+        ///////////////////////////////////////////////////////////
+        void finished(const QList<NotifyEntry> notifications);
+    };
 }
 
 
-#endif  // __ASE_PARAMETERTYPE_HPP__
+#endif  // __ASE_RTWORKER_HPP__
