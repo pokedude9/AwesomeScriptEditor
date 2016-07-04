@@ -185,7 +185,7 @@ namespace ase
 
 
         // Highlights normal strings through regex
-        regex.setPattern("(\"|<)\\w(\\w|\\d)+(\"|>)");
+        regex.setPattern("(\"|<).+(\"|>)");
         match = regex.match(text);
         if (match.hasMatch())
         {

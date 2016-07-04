@@ -752,7 +752,7 @@ namespace ase
         {
             ui->frame->setVisible(false);
             ui->plainTextEdit->setErrors(QList<NotifyEntry>());
-            m_Validator->stop();
+            m_Timer->stop();
         }
     }
 

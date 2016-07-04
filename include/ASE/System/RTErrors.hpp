@@ -55,9 +55,9 @@ namespace ase
     #define RT_INVALID_LABEL            "Erroneous label syntax '%s'."
     #define RT_INVALID_ASE_LABEL        "Erroneous ASE label syntax '%s'. Expected ':'."
     #define RT_UNKNOWN_IDENTIFIER       "Identifier '%s' is not a command, macro or preprocessor directive."
-    #define RT_INVALID_ARGCOUNT         "Invalid argument count for command '%i'."
-    #define RT_INVALID_PARAMETER_N      "Parameter '%i': Expected numeric value. Got '%s'."
-    #define RT_INVALID_PARAMETER_O      "Parameter '%i': Numeric value overflow. Expected: <'%i'. Got: '%i'."
+    #define RT_INVALID_ARGCOUNT         "Invalid argument count for command '%s'. Got: %i. Expected: %i."
+    #define RT_INVALID_PARAMETER_N      "Parameter %i: Expected numeric value. Got '%s'."
+    #define RT_INVALID_PARAMETER_O      "Parameter %i: Numeric value overflow. Expected: <%u. Got: %i."
     #define RT_INVALID_PARAMETER_I      "Given parameter '%s' is not a macro or label. Ignore if label existing later in the code."
 }
 

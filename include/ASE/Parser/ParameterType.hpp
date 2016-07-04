@@ -86,7 +86,7 @@ namespace ase
         /// \returns the size of the parameter, in bytes.
         ///
         ///////////////////////////////////////////////////////////
-        inline int GetParamSize(ParameterType type)
+        inline unsigned int GetParamSize(ParameterType type)
         {
             if (type == PT_Byte)
                 return PT_BYTE_SIZE;

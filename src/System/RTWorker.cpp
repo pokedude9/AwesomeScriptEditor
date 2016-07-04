@@ -84,13 +84,13 @@ namespace ase
     // Date of edit:   7/3/2016
     //
     ///////////////////////////////////////////////////////////
-    bool checkRange(QString str, int max)
+    bool checkRange(QString str, uint max)
     {
-        int value;
+        uint value;
         if (str.startsWith("0x"))
-            value = str.remove(0, 2).toInt(NULL, 16);
+            value = str.remove(0, 2).toUInt(NULL, 16);
         else
-            value = str.toInt();
+            value = str.toUInt();
 
         return (value <= max);
     }
@@ -102,13 +102,13 @@ namespace ase
     // Date of edit:   7/3/2016
     //
     ///////////////////////////////////////////////////////////
-    int extractNumber(QString str)
+    uint extractNumber(QString str)
     {
-        int value;
+        uint value;
         if (str.startsWith("0x"))
-            value = str.remove(0, 2).toInt(NULL, 16);
+            value = str.remove(0, 2).toUInt(NULL, 16);
         else
-            value = str.toInt();
+            value = str.toUInt();
 
         return value;
     }
@@ -205,9 +205,9 @@ namespace ase
             {
                 // Define, Include, Move, Item, Byte, HWord, Word, Org
                 trimmedLine.remove(0, 1);
-                if (trimmedLine.startsWith("define"))
+                if (trimmedLine.startsWith("define "))
                 {
-                    regex.setPattern("define\\s+\\w(\\w|\\d)+\\s+\\d+$");
+                    regex.setPattern("define\\s+\\w(\\w|\\d)+\\s+(\\b\\d+\\b)|(\\b0[xX][0-9a-fA-F]+\\b)$");
                     if (!regex.match(trimmedLine).hasMatch())
                     {
                         // Invalid definition
@@ -219,12 +219,12 @@ namespace ase
                     {
                         int ws1 = trimmedLine.indexOf(' ')+1;
                         int ws2 = trimmedLine.lastIndexOf(' ');
-                        macroRegex.insert(4, trimmedLine.mid(ws1, ws2-ws1) + QString("|"));
+                        macroRegex.insert(3, trimmedLine.mid(ws1, ws2-ws1) + QString("|"));
                     }
                 }
-                else if (trimmedLine.startsWith("include"))
+                else if (trimmedLine.startsWith("include "))
                 {
-                    regex.setPattern("include\\s+(\"|<)\\w(\\w|\\d)+(\"|>)$");
+                    regex.setPattern("include\\s+(\"|<).+(\"|>)$");
                     if (!regex.match(trimmedLine).hasMatch())
                     {
                         // Invalid include expression
@@ -233,7 +233,7 @@ namespace ase
                         continue;
                     }
                 }
-                else if (trimmedLine.startsWith("move"))
+                else if (trimmedLine.startsWith("move "))
                 {
                     regex.setPattern("move\\s+(\\b\\d+\\b)|(\\b0[xX][0-9a-fA-F]+\\b)$");
                     if (!regex.match(trimmedLine).hasMatch())
@@ -250,7 +250,7 @@ namespace ase
                         }
                     }
                 }
-                else if (trimmedLine.startsWith("item"))
+                else if (trimmedLine.startsWith("item "))
                 {
                     regex.setPattern("item\\s+(\\d+)|(0[xX][0-9a-fA-F]+)$");
                     if (!regex.match(trimmedLine).hasMatch())
@@ -267,7 +267,7 @@ namespace ase
                         }
                     }
                 }
-                else if (trimmedLine.startsWith("byte"))
+                else if (trimmedLine.startsWith("byte "))
                 {
                     regex.setPattern("byte\\s+(\\b\\d+\\b)|(\\b0[xX][0-9a-fA-F]+\\b)$");
                     if (!regex.match(trimmedLine).hasMatch())
@@ -293,7 +293,7 @@ namespace ase
                         }
                     }
                 }
-                else if (trimmedLine.startsWith("hword"))
+                else if (trimmedLine.startsWith("hword "))
                 {
                     regex.setPattern("hword\\s+(\\b\\d+\\b)|(\\b0[xX][0-9a-fA-F]+\\b)$");
                     if (!regex.match(trimmedLine).hasMatch())
@@ -319,7 +319,7 @@ namespace ase
                         }
                     }
                 }
-                else if (trimmedLine.startsWith("word"))
+                else if (trimmedLine.startsWith("word "))
                 {
                     regex.setPattern("word\\s+(\\b\\d+\\b)|(\\b0[xX][0-9a-fA-F]+\\b)$");
                     if (!regex.match(trimmedLine).hasMatch())
@@ -345,7 +345,7 @@ namespace ase
                         }
                     }
                 }
-                else if (trimmedLine.startsWith("org"))
+                else if (trimmedLine.startsWith("org "))
                 {
                     if (isXSE)
                         regex.setPattern("org\\s+@(\\w|\\d)+$");
@@ -369,21 +369,21 @@ namespace ase
                         labels.push_back(sub);
                     }
                 }
-                else if (!isXSE && trimmedLine.right(1) == ":")
-                {
-                    regex.setPattern("^\\w(\\w|\\d)+:$");
-                    if (!regex.match(trimmedLine).hasMatch())
-                    {
-                        // Invalid ASE label
-                        rtError(RT_INVALID_ASE_LABEL, trimmedLine.toStdString().c_str());
-                        continue;
-                    }
-                }
                 else
                 {
                     // Unknown preprocessor directive
                     QString arg0 = trimmedLine.mid(0, trimmedLine.indexOf(' '));
                     rtError(RT_UNKNOWN_PREPROC, arg0.toStdString().c_str());
+                    continue;
+                }
+            }
+            else if (!isXSE && trimmedLine.right(1) == ":")
+            {
+                regex.setPattern("^\\w(\\w|\\d)+:$");
+                if (!regex.match(trimmedLine).hasMatch())
+                {
+                    // Invalid ASE label
+                    rtError(RT_INVALID_ASE_LABEL, trimmedLine.toStdString().c_str());
                     continue;
                 }
             }
@@ -423,23 +423,24 @@ namespace ase
                     QStringList params;
                     while (ws != -1)
                     {
-                        int next = trimmedLine.indexOf(' ', ws);
+                        int next = trimmedLine.indexOf(' ', ws+1);
                         params.push_back(trimmedLine.mid(ws+1, next-(ws+1)));
                         ws = next;
                     }
                     if (params.size() != cmd->params().size())
                     {
-                        // Invalid argument count
-                        int arg0 = params.size();
-                        rtError(RT_INVALID_ARGCOUNT, arg0);
+                        // Invalid argument couramnt
+                        int arg1 = params.size();
+                        int arg2 = cmd->params().size();
+                        rtError(RT_INVALID_ARGCOUNT, command.toStdString().c_str(), arg1, arg2);
                         continue;
                     }
                     else
                     {
-                        for (int i = 0; i < params.size(); i++)
+                        for (int j = 0; j < params.size(); j++)
                         {
-                            ParameterType type = cmd->params().at(i)->type();
-                            QString param = params.at(i);
+                            ParameterType type = cmd->params().at(j)->type();
+                            QString param = params.at(j);
                             if (param.left(1) == "@")
                                 param.leftRef(1).clear();
 
@@ -448,15 +449,15 @@ namespace ase
                                 if (!regHex.exactMatch(param))
                                 {
                                     // Is not a number!
-                                    rtError(RT_INVALID_PARAMETER_N, i, param.toStdString().c_str());
+                                    rtError(RT_INVALID_PARAMETER_N, j, param.toStdString().c_str());
                                     break;
                                 }
-                                if (checkRange(param, ParameterTypeHelper::GetMaxValue(type)))
+                                if (!checkRange(param, ParameterTypeHelper::GetMaxValue(type)))
                                 {
                                     // Parameter out of range!
                                     int arg1 = ParameterTypeHelper::GetMaxValue(type);
                                     int arg2 = extractNumber(param);
-                                    rtError(RT_INVALID_PARAMETER_O, i, arg1, arg2);
+                                    rtError(RT_INVALID_PARAMETER_O, j, arg1, arg2);
                                     break;
                                 }
                             }
@@ -476,12 +477,12 @@ namespace ase
                                         }
                                     }
                                 }
-                                if (checkRange(param, ParameterTypeHelper::GetMaxValue(type)))
+                                if (!checkRange(param, ParameterTypeHelper::GetMaxValue(type)))
                                 {
                                     // Parameter out of range!
                                     int arg1 = ParameterTypeHelper::GetMaxValue(type);
                                     int arg2 = extractNumber(param);
-                                    rtError(RT_INVALID_PARAMETER_O, i, arg1, arg2);
+                                    rtError(RT_INVALID_PARAMETER_O, j, arg1, arg2);
                                     break;
                                 }
                             }

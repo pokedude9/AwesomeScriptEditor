@@ -63,12 +63,17 @@ namespace ase
             QString text = line.text().split('\n')[0];
             Int32 posY = (fontMetrics().height() * e.line) + 3;
             size_t posX = text.toStdString().find_first_not_of(' ');
+
             if (posX == std::string::npos)
                 continue;
+            if (e.type == NT_Error)
+                painter.setPen(0xFF0030);
+            else
+                painter.setPen(0xFFA000);
 
 
             // Paints the line
-            posX += (posX * fontMetrics().width(' ') + 4);
+            posX += (posX * fontMetrics().width(' '));
             posY += fontMetrics().height();
             painter.drawLine(posX, posY, posX + fontMetrics().width(text.trimmed()), posY);
         }
@@ -253,7 +258,7 @@ namespace ase
                 painter.drawText(
                     0, topPos,
                     m_LineWidget->width() - 16, fontMetrics().height(),
-                    Qt::AlignRight, QString::number(blockNumber + 1)
+                    Qt::AlignRight, QString::number(blockNumber)
                 );
             }
 
