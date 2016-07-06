@@ -414,7 +414,80 @@ namespace ase
                     }
                     else
                     {
-                        // TODO: Check macro parameters
+                        // Check macro parameters
+                        QStringList params;
+                        QList<MacroDynamicParam *> mcrParams;
+                        while (ws != -1)
+                        {
+                            int next = trimmedLine.indexOf(' ', ws+1);
+                            params.push_back(trimmedLine.mid(ws+1, next-(ws+1)));
+                            ws = next;
+                        }
+                        for (int j = 0; j < mcr->entries().size(); j++)
+                        {
+                            mcrParams.append(mcr->entries().at(i)->dynamicParams());
+                        }
+                        if (params.size() != mcrParams.size())
+                        {
+                            // Invalid argument count
+                            int arg1 = params.size();
+                            int arg2 = mcrParams.size();
+                            rtError(RT_INVALID_ARGCOUNT, command.toStdString().c_str(), arg1, arg2);
+                            continue;
+                        }
+                        else
+                        {
+                            for (int j = 0; j < params.size(); j++)
+                            {
+                                ParameterType type;
+                                QString param = params.at(j);
+                                if (param.left(1) == "@")
+                                    param.leftRef(1).clear();
+
+                                if (type < PT_Pointer)
+                                {
+                                    if (!regHex.exactMatch(param))
+                                    {
+                                        // Is not a number!
+                                        rtError(RT_INVALID_PARAMETER_N, j, param.toStdString().c_str());
+                                        break;
+                                    }
+                                    /*if (!checkRange(param, ParameterTypeHelper::GetMaxValue(type)))
+                                    {
+                                        // Parameter out of range!
+                                        int arg1 = ParameterTypeHelper::GetMaxValue(type);
+                                        int arg2 = extractNumber(param);
+                                        rtError(RT_INVALID_PARAMETER_O, j, arg1, arg2);
+                                        break;
+                                    }*/
+                                }
+                                else
+                                {
+                                    if (!regHex.exactMatch(param))
+                                    {
+                                        // Determines whether the label is existing
+                                        if (!labels.contains(param))
+                                        {
+                                            regex.setPattern(macroRegex);
+                                            if (!regex.match(param).hasMatch())
+                                            {
+                                                // Not a macro, not a label (warning!)
+                                                rtWarning(RT_INVALID_PARAMETER_I, param.toStdString().c_str());
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    /*if (!checkRange(param, ParameterTypeHelper::GetMaxValue(type)))
+                                    {
+                                        // Parameter out of range!
+                                        int arg1 = ParameterTypeHelper::GetMaxValue(type);
+                                        int arg2 = extractNumber(param);
+                                        rtError(RT_INVALID_PARAMETER_O, j, arg1, arg2);
+                                        break;
+                                    }*/
+                                }
+                            }
+                        }
                     }
                 }
                 else
@@ -429,7 +502,7 @@ namespace ase
                     }
                     if (params.size() != cmd->params().size())
                     {
-                        // Invalid argument couramnt
+                        // Invalid argument count
                         int arg1 = params.size();
                         int arg2 = cmd->params().size();
                         rtError(RT_INVALID_ARGCOUNT, command.toStdString().c_str(), arg1, arg2);

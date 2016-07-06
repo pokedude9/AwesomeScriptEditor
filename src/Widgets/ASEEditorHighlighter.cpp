@@ -36,6 +36,7 @@
 //
 ///////////////////////////////////////////////////////////
 #include <ASE/Widgets/ASEEditorHighlighter.hpp>
+#include <ASE/System/Configuration.hpp>
 #include <QRegularExpression>
 
 
@@ -120,25 +121,31 @@ namespace ase
     ///////////////////////////////////////////////////////////
     void ASEEditorHighlighter::highlightBlock(const QString &text)
     {
-        // Highlights decimal and hexadecimal numbers through regex
-        QRegularExpressionMatch match;
-        QRegularExpression regex("(\\b\\d+\\b)|(\\b0[xX][0-9a-fA-F]+\\b)");
-        QRegularExpressionMatchIterator iter = regex.globalMatch(text);
-        while (iter.hasNext())
-        {
-            // Proceeds the next match and highlights it
-            match = iter.next();
-            setFormat(match.capturedStart(), match.capturedLength(), m_ClrNumber);
-        }
+        m_UseXSE = (CONFIG(Language) == BL_XSE);
 
+
+        QRegularExpressionMatchIterator iter;
+        QRegularExpressionMatch match;
+        QRegularExpression regex("(\\/\\/)+.*");
 
         // Highlights single-line commands through regex
-        regex.setPattern("(\\/\\/)+.*");
         match = regex.match(text);
         if (match.hasMatch())
         {
             // This regex can only have one match!
             setFormat(match.capturedStart(), match.capturedLength(), m_ClrComment);
+            return;
+        }
+
+
+        // Highlights decimal and hexadecimal numbers through regex
+        regex.setPattern("(\\b\\d+\\b)|(\\b0[xX][0-9a-fA-F]+\\b)");
+        iter = regex.globalMatch(text);
+        while (iter.hasNext())
+        {
+            // Proceeds the next match and highlights it
+            match = iter.next();
+            setFormat(match.capturedStart(), match.capturedLength(), m_ClrNumber);
         }
 
 

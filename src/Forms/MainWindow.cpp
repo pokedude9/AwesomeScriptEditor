@@ -769,3 +769,19 @@ namespace ase
         on_actionReal_time_script_validator_triggered();
     }
 }
+
+void ase::MainWindow::on_actionXSE_triggered()
+{
+    ui->actionXSE->setChecked(true);
+    ui->actionASE->setChecked(false);
+    CONFIG(Language) = BL_XSE;
+    ui->plainTextEdit->rehighlight();
+}
+
+void ase::MainWindow::on_actionASE_triggered()
+{
+    ui->actionASE->setChecked(true);
+    ui->actionXSE->setChecked(false);
+    CONFIG(Language) = BL_ASE;
+    ui->plainTextEdit->rehighlight();
+}

@@ -361,7 +361,15 @@ QPlainTextEdit#plainTextEdit
     <property name="title">
      <string>Settings</string>
     </property>
+    <widget class="QMenu" name="menuLanguage">
+     <property name="title">
+      <string>Language</string>
+     </property>
+     <addaction name="actionXSE"/>
+     <addaction name="actionASE"/>
+    </widget>
     <addaction name="actionReal_time_script_validator"/>
+    <addaction name="menuLanguage"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -647,6 +655,25 @@ QPlainTextEdit#plainTextEdit
     <string/>
    </property>
   </action>
+  <action name="actionXSE">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>XSE</string>
+   </property>
+  </action>
+  <action name="actionASE">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>ASE</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -728,6 +755,22 @@ QPlainTextEdit#plainTextEdit
    <sender>actionLevelscript</sender>
    <signal>triggered()</signal>
    <receiver>actionDecompile_Levelscript</receiver>
+   <slot>trigger()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionASE</sender>
+   <signal>triggered()</signal>
+   <receiver>actionXSE</receiver>
    <slot>trigger()</slot>
    <hints>
     <hint type="sourcelabel">

@@ -162,6 +162,10 @@ namespace ase
         void on_actionCloseDebugger_triggered();
 
 
+        void on_actionXSE_triggered();
+
+        void on_actionASE_triggered();
+
     private:
 
         ///////////////////////////////////////////////////////////
