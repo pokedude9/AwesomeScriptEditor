@@ -25,5 +25,8 @@
         <file>images/close_misc.png</file>
         <file>images/script_error.png</file>
         <file>images/script_warning.png</file>
+        <file>misc/ScriptRules.xml</file>
+        <file>misc/EditorDesign.xml</file>
+        <file>UI/SourceCodePro.ttf</file>
     </qresource>
 </RCC>

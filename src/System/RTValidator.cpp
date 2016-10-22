@@ -47,15 +47,20 @@ namespace ase
     // Date of edit:   7/3/2016
     //
     ///////////////////////////////////////////////////////////
-    RTValidator::RTValidator(ASEEditor *editor)
-        : QObject(editor)
+    RTValidator::RTValidator(QPlainTextEdit *parent)
+        : QObject(parent)
     {
-        m_Editor = editor;
+        m_Editor = parent;
         m_Thread = new QThread;
         m_Worker = new RTWorker;
-        m_Worker->moveToThread(m_Thread);    
+        m_Edit = new QTextEdit;
+        m_Worker->moveToThread(m_Thread);
+
         connect(this, SIGNAL(validate(QString)), m_Worker, SLOT(debug(QString)));
         qRegisterMetaType<QList<NotifyEntry>>("QList<NotifyEntry>");
+        qRegisterMetaType<QTextCursor>("QTextCursor");
+
+        m_Worker->setTextEdit(m_Edit);
         m_Thread->start();
     }
 
@@ -72,6 +77,8 @@ namespace ase
             m_Thread->terminate();
 
         delete m_Thread;
+        delete m_Worker;
+        delete m_Edit;
     }
 
 
@@ -90,7 +97,6 @@ namespace ase
             // must wait for next interval
             return;
         }
-
 
         emit validate(m_Editor->toPlainText());
     }

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<design>
+    <!-- Order of declaration and character case does not matter -->
+    <editorbackcolor>#ffffff</editorbackcolor>
+    <editortextcolor>#000000</editortextcolor>
+    <editorbordercolor>#b9b9b9</editorbordercolor>
+    <linecolumnbackcolor>#e9e9e9</linecolumnbackcolor>
+    <linecolumntextcolor>#6a9fc6</linecolumntextcolor>
+    <linecolumnseparatorcolor>#b9b9b9</linecolumnseparatorcolor>
+    <activelinecolor>0xfc9100</activelinecolor>
+    <intelliboxbackcolor>#ffffff</intelliboxbackcolor>
+    <intelliboxtextcolor>#000000</intelliboxtextcolor>
+    <intelliboxbordercolor>#b9b9b9</intelliboxbordercolor>
+    <editorfont>
+        <family>Source Code Pro</family>
+        <pointsize>9</pointsize>
+    </editorfont>
+    <intelliboxfont>
+        <family>Source Code Pro</family>
+        <pointsize>9</pointsize>
+    </intelliboxfont>
+    <editorborder>1 1 1 0</editorborder>
+    <intelliboxborder>1 1 1 1</intelliboxborder>
+    <linecolumnpadding>16 16</linecolumnpadding>
+    <popupsize>400 300</popupsize>
+    <haslinecolumn>true</haslinecolumn>
+    <showfocusrect>false</showfocusrect>
+    <firstlineone>true</firstlineone>
+</design>

@@ -31,6 +31,8 @@ win:QMAKE_TARGET_COPYRIGHT   = (C) 2016 Pokedude, Diegoisawesome
 INCLUDEPATH += include
 INCLUDEPATH += include/ASE/Forms
 INCLUDEPATH += include/ASE/Widgets
+INCLUDEPATH += $$PWD/../QCodeEditor/include $$PWD/../QCodeEditor/include/KGL/Widgets
+INCLUDEPATH += $$PWD/../QTerminal/include
 INCLUDEPATH += $$PWD/../QBoy/include
 DEPENDPATH  += $$PWD/../QBoy/include
 QMAKE_LFLAGS += -static-libgcc -static-libstdc++
@@ -39,7 +41,15 @@ QMAKE_LFLAGS += -static-libgcc -static-libstdc++
 #
 # QMake Settings, 4
 #
-unix|win32: LIBS += -L$$PWD/../QBoy/bin/debug/ -lQBoy
+CONFIG(debug, debug|release) {
+    unix|win32: LIBS += -L$$PWD/../QBoy/bin/debug/ -lQBoy
+    unix|win32: LIBS += -L$$PWD/../QCodeEditor/bin/debug/ -lQCodeEditor
+    unix|win32: LIBS += -L$$PWD/../QTerminal/bin/debug/ -lQTerminal
+} else {
+    unix|win32: LIBS += -L$$PWD/../QBoy/bin/release/ -lQBoy
+    unix|win32: LIBS += -L$$PWD/../QCodeEditor/bin/release/ -lQCodeEditor
+    unix|win32: LIBS += -L$$PWD/../QTerminal/bin/release/ -lQTerminal
+}
 
 
 #
@@ -50,13 +60,13 @@ SOURCES += \
     src/main.cpp \
     src/Widgets/Misc/Messages.cpp \
     src/Widgets/Misc/StyleSheets.cpp \
-    src/Widgets/ASEEditorHighlighter.cpp \
-    src/Widgets/ASEEditorLineWidget.cpp \
-    src/Widgets/ASEEditor.cpp \
-    src/Widgets/ASEEditorEvents.cpp \
-    src/Widgets/ASEEditorPopupLabel.cpp \
-    src/Widgets/ASEEditorPopup.cpp \
-    src/Widgets/ASEEditorSlots.cpp \
+    #src/Widgets/ASEEditorHighlighter.cpp \
+    #src/Widgets/ASEEditorLineWidget.cpp \
+    #src/Widgets/ASEEditor.cpp \
+    #src/Widgets/ASEEditorEvents.cpp \
+    #src/Widgets/ASEEditorPopupLabel.cpp \
+    #src/Widgets/ASEEditorPopup.cpp \
+    #src/Widgets/ASEEditorSlots.cpp \
     src/Widgets/ASEHexBox.cpp \
     src/System/Configuration.cpp \
     src/Parser/Parameter.cpp \
@@ -86,11 +96,11 @@ HEADERS  += \
     include/ASE/Forms/MainWindow.h \
     include/ASE/Widgets/Misc/Messages.hpp \
     include/ASE/Widgets/Misc/StyleSheets.hpp \
-    include/ASE/Widgets/ASEEditorHighlighter.hpp \
-    include/ASE/Widgets/ASEEditorLineWidget.hpp \
-    include/ASE/Widgets/ASEEditor.hpp \
-    include/ASE/Widgets/ASEEditorPopupLabel.hpp \
-    include/ASE/Widgets/ASEEditorPopup.hpp \
+    #include/ASE/Widgets/ASEEditorHighlighter.hpp \
+    #include/ASE/Widgets/ASEEditorLineWidget.hpp \
+    #include/ASE/Widgets/ASEEditor.hpp \
+    #include/ASE/Widgets/ASEEditorPopupLabel.hpp \
+    #include/ASE/Widgets/ASEEditorPopup.hpp \
     include/ASE/Widgets/ASEHexBox.hpp \
     include/ASE/System/Configuration.hpp \
     include/ASE/Parser/ParameterType.hpp \
@@ -132,4 +142,6 @@ DISTFILES += \
     resources/config/BPRE.xml \
     resources/config/Script.Default.xml \
     resources/config/AXVE.xml \
-    resources/config/BPEE.xml
+    resources/config/BPEE.xml \
+    resources/misc/ScriptRules.xml \
+    resources/misc/EditorDesign.xml

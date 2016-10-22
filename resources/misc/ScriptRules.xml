@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<rules>
+    <rule id="numbers">
+        <!-- Styles decimal and hexadecimal numbers -->
+        <regex>(\b\d+\b)|(\b0[xX][0-9a-fA-F]+\b)</regex>
+        <forecolor>#c82829</forecolor>
+    </rule>
+    <rule id="strings">
+        <!-- Styles Pokémon strings in ASE & XSE -->
+        <regex>((=\s|\s|^)\K)(&lt;.+&gt;|&quot;.+&quot;)</regex>
+        <forecolor>#f5871f</forecolor>
+    </rule>
+    <rule id="macros" global="false">
+        <!-- Styles the #define macroes -->
+        <regex>(\s*#define\s+\K)\S+(?=\s+\S+)</regex>
+        <forecolor>#718c00</forecolor>
+    </rule>
+    <rule id="includes" global="false">
+        <!-- Styles the #include files -->
+        <regex>(\s*#include\s+\K)\S+</regex>
+        <forecolor>#718c00</forecolor>
+    </rule>
+    <rule id="preprocessor" global="false">
+        <!-- Styles all preprocessor directives -->
+        <keywords start="true">#include #define #org #item #move #byte #hword #word #pointer</keywords>
+        <forecolor>#718c00</forecolor>
+    </rule>
+    <rule id="pointers">
+        <!-- Styles all pointers (e.g. @ptr) -->
+        <regex>\s\K(@|&amp;)\w+</regex>
+        <forecolor>#4271ae</forecolor>
+    </rule>
+    <rule id="labels">
+        <!-- Styles all labels (ASE only) -->
+        <regex>\s*\w+:</regex>
+        <forecolor>#4271ae</forecolor>
+    </rule>
+    <rule id="comments">
+        <!-- Styles comments in XSE and ASE style -->
+        <regex>(\/\/|'|;).*</regex>
+        <forecolor>#8e908c</forecolor>
+        <font>
+            <italic>true</italic>
+        </font>
+    </rule>
+</rules>

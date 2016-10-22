@@ -39,8 +39,8 @@
 // Include files
 //
 ///////////////////////////////////////////////////////////
-#include <ASE/Widgets/ASEEditor.hpp>
 #include <ASE/System/RTWorker.hpp>
+#include <QPlainTextEdit>
 #include <QThread>
 
 
@@ -67,7 +67,7 @@ namespace ase
         /// Initializes a new instance of ase::RTValidator.
         ///
         ///////////////////////////////////////////////////////////
-        RTValidator(ASEEditor *editor);
+        RTValidator(QPlainTextEdit *parent);
 
         ///////////////////////////////////////////////////////////
         /// \brief Destructor
@@ -113,7 +113,8 @@ namespace ase
         // Class members
         //
         ///////////////////////////////////////////////////////////
-        ASEEditor           *m_Editor;
+        QPlainTextEdit      *m_Editor;
+        QTextEdit           *m_Edit;
         RTWorker            *m_Worker;
         QThread             *m_Thread;
     };

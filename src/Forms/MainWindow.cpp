@@ -43,6 +43,7 @@
 #include "ui_MainWindow.h"
 
 
+using namespace kgl;
 namespace ase
 {
     ///////////////////////////////////////////////////////////
@@ -69,6 +70,21 @@ namespace ase
         ui->setupUi(this);
         setupCommands();
         setupAdvanced();
+
+        int index;
+        if ((index = QFontDatabase::addApplicationFont(":/UI/SourceCodePro.ttf")) == -1)
+        {
+            QFont mono("Monospace");
+            mono.setStyleHint(QFont::TypeWriter);
+            ui->plainTextEdit->setFont(mono);
+        }
+        else
+        {
+            QStringList list = QFontDatabase::applicationFontFamilies(index);
+            QFont font(list.at(0));
+            font.setPointSize(9);
+            ui->plainTextEdit->setFont(font);
+        }
     }
 
 
@@ -137,7 +153,7 @@ namespace ase
         m_ErrorIcons[0] = QIcon(":/images/script_warning");
         m_ErrorIcons[1] = QIcon(":/images/script_error");
 
-        m_Timer->setInterval(1000);
+        m_Timer->setInterval(2000);
         ui->plainTextEdit->installEventFilter(this);
         connect(m_Validator->worker(), SIGNAL(finished(QList<NotifyEntry>)), this, SLOT(doneValidating(QList<NotifyEntry>)));
         connect(m_Timer, SIGNAL(timeout()), this, SLOT(executeValidating()));
@@ -155,18 +171,6 @@ namespace ase
         Configuration::read();
         auto commands = Configuration::getCommands(0);
         auto macroes = Configuration::getMacroes(0);
-        const QStringList preproc =
-        {
-            "org",
-            "define",
-            "include",
-            "item",
-            "move",
-            "byte",
-            "hword",
-            "word",
-            "pointer"
-        };
 
         QStringList functionNames;
         QStringList functionInfos;
@@ -184,11 +188,10 @@ namespace ase
             macroInfos.push_back(macro->info());
         }
 
-        ui->plainTextEdit->setFunctions(functionNames);
-        ui->plainTextEdit->setFunctionInfos(functionInfos);
-        ui->plainTextEdit->setPreprocessor(preproc);
-        ui->plainTextEdit->setMacroFunctions(macroFunctions);
-        ui->plainTextEdit->setMacroFunctionInfos(macroInfos);
+        QCodeEditorDesign design(":/misc/EditorDesign.xml");
+        QList<QSyntaxRule> rules = QSyntaxRules::loadFromFile(":/misc/ScriptRules.xml", design);
+        ui->plainTextEdit->setRules(rules);
+        ui->plainTextEdit->setDesign(design);
     }
 
     ///////////////////////////////////////////////////////////
@@ -400,8 +403,8 @@ namespace ase
                 {
                     // Debug after stopping to type
                     // Should immediately update when deleting something
-                    if (((QKeyEvent *)event)->key() == Qt::Key_Backspace)
-                        executeValidating();
+                    /*if (((QKeyEvent *)event)->key() == Qt::Key_Backspace)
+                        executeValidating();*/
 
                     m_Timer->start();
                 }
@@ -434,7 +437,7 @@ namespace ase
     ///////////////////////////////////////////////////////////
     void MainWindow::doneValidating(const QList<NotifyEntry> e)
     {
-        ui->plainTextEdit->setErrors(e);
+        //ui->plainTextEdit->setErrors(e);
 
         // Clears the old table except for header
         ui->tableWidget->setUpdatesEnabled(false);
@@ -751,7 +754,7 @@ namespace ase
         else
         {
             ui->frame->setVisible(false);
-            ui->plainTextEdit->setErrors(QList<NotifyEntry>());
+            //ui->plainTextEdit->setErrors(QList<NotifyEntry>());
             m_Timer->stop();
         }
     }

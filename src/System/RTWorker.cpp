@@ -39,6 +39,7 @@
 #include <ASE/System/RTErrors.hpp>
 #include <ASE/System/Configuration.hpp>
 #include <QRegularExpression>
+#include <QTextCursor>
 
 
 namespace ase
@@ -81,16 +82,34 @@ namespace ase
     // Function type:  Helper
     // Contributors:   Pokedude
     // Last edit by:   Pokedude
+    // Date of edit:   10/22/2016
+    //
+    ///////////////////////////////////////////////////////////
+    inline bool isValidDef(const QString &s, const QString &chk, const QStringList &m)
+    {
+        // Check if move/item/byte definition has a macro
+        QString pre = s + " %0";
+        for (const QString &mac : m)
+            if (pre.arg(mac) == chk)
+                return true;
+
+        return false;
+    }
+
+    ///////////////////////////////////////////////////////////
+    // Function type:  Helper
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
     // Date of edit:   7/3/2016
     //
     ///////////////////////////////////////////////////////////
-    bool checkRange(QString str, uint max)
+    inline bool checkRange(QString str, quint64 max)
     {
-        uint value;
+        quint64 value;
         if (str.startsWith("0x"))
-            value = str.remove(0, 2).toUInt(NULL, 16);
+            value = str.remove(0, 2).toULongLong(NULL, 16);
         else
-            value = str.toUInt();
+            value = str.toULongLong();
 
         return (value <= max);
     }
@@ -102,7 +121,7 @@ namespace ase
     // Date of edit:   7/3/2016
     //
     ///////////////////////////////////////////////////////////
-    uint extractNumber(QString str)
+    inline uint extractNumber(QString str)
     {
         uint value;
         if (str.startsWith("0x"))
@@ -139,6 +158,18 @@ namespace ase
         running = false;
     }
 
+    ///////////////////////////////////////////////////////////
+    // Function type:  Setter
+    // Contributors:   Pokedude
+    // Last edit by:   Pokedude
+    // Date of edit:   10/22/2016
+    //
+    ///////////////////////////////////////////////////////////
+    void RTWorker::setTextEdit(QTextEdit *edit)
+    {
+        m_Edit = edit;
+    }
+
 
     ///////////////////////////////////////////////////////////
     // Function type:  Slot
@@ -155,412 +186,244 @@ namespace ase
         mutex.unlock();
 
 
-        // Splits the code up to it's lines while removing empty lines
+        bool isXSE = (CONFIG(Language) == BL_XSE);
+
+        // Defines some precompiled regexes for preprocessor
+        static QRegularExpression regByte("#byte\\s\\K(\\b\\d+\\b)|(\\b0[xX][0-9a-fA-F]+\\b)$");
+        static QRegularExpression regHalf("#hword\\s\\K(\\b\\d+\\b)|(\\b0[xX][0-9a-fA-F]+\\b)$");
+        static QRegularExpression regWord("#word\\s\\K(\\b\\d+\\b)|(\\b0[xX][0-9a-fA-F]+\\b)$");
+        static QRegularExpression regMove("#move\\s\\K(\\b\\d+\\b)|(\\b0[xX][0-9a-fA-F]+\\b)$");
+        static QRegularExpression regItem("#item\\s\\K(\\b\\d+\\b)|(\\b0[xX][0-9a-fA-F]+\\b)$");
+        static QRegularExpression regDef("#define\\s\\K(\\w+\\s\\S+)$");
+        static QRegularExpression regInc("#include\\s\\K(<.+>|\".+\")$");
+        static QRegularExpression regOrg("#org\\s\\K(@\\w+$)");
+        static QRegularExpression regLbl("\\w+:$");
+
+        // Predefined variables
+        static QString comment1 = "//";
+        static QChar comment2 = '\'';
+        static QChar comment3 = ';';
+        static QChar preproc = '#';
+        static QString p1 = "#define", p2 = "#include",
+                       p3 = "#org",    p4 = "#move",
+                       p5 = "#item",   p6 = "#byte",
+                       p7 = "#hword",  p8 = "#word";
+
+        QStringList macros;
+
+
+        // Splits the entire code up in several lines
         QList<NotifyEntry> notifications;
         QStringList codeLines = code.split('\n');
-        QString charPreproc, charPointer;
-        QRegularExpression regex;
-        QRegExp regHex("(\\b\\d+\\b)|(\\b0[xX][0-9a-fA-F]+\\b)");
-        QStringList labels;
-        QString macroRegex("\\b(X)\\b");
-
-        bool isXSE;
-        if ((isXSE = (CONFIG(Language) == BL_XSE)))
+        int i = -1;
+        for (const QString &q : codeLines)
         {
-            charPreproc.push_back('#');
-            charPointer.push_back('@');
-        }
-        else
-        {
-            charPreproc.push_back('.');
-        }
-
-
-        // Iterates through every line and searches for errors
-        for (int i = 0; i < codeLines.size(); i++)
-        {
-            // Determines whether an abort was requested
-            mutex.lock();
-            if (!running)
-            {
-                mutex.unlock();
-                return;
-            }
-            mutex.unlock();
-
-
-            // Removes all leading and trailing whitespace
-            QString trimmedLine = codeLines[i].trimmed();
-
-
-            if (trimmedLine.isEmpty() || trimmedLine.startsWith("//"))
+            // Return if line is a comment
+            QString line = q.simplified(); i++;
+            if (line.isEmpty()            ||
+                line.startsWith(comment1) ||
+                line.startsWith(comment2) ||
+                line.startsWith(comment3)) {
                 continue;
-
-            if (trimmedLine.contains("//"))
-            {
-                trimmedLine.remove(trimmedLine.indexOf("//"), INT_MAX);
-                trimmedLine = trimmedLine.trimmed();
             }
-            if (trimmedLine.startsWith(charPreproc))
+
+
+            //////////////////////////////////////////////////////////////////////////////
+            //                                                                          //
+            //                                                                          //
+            //          Determines whether line is preprocessor directive               //
+            //                                                                          //
+            //                                                                          //
+            //////////////////////////////////////////////////////////////////////////////
+            if (line.startsWith(preproc))
             {
-                // Define, Include, Move, Item, Byte, HWord, Word, Org
-                trimmedLine.remove(0, 1);
-                if (trimmedLine.startsWith("define "))
+                if (line.startsWith(p1))
                 {
-                    regex.setPattern("define\\s+\\w(\\w|\\d)+\\s+(\\b\\d+\\b)|(\\b0[xX][0-9a-fA-F]+\\b)$");
-                    if (!regex.match(trimmedLine).hasMatch())
+                    QRegularExpressionMatch m = regDef.match(line);
+                    if (!m.hasMatch())
                     {
-                        // Invalid definition
-                        QString arg0 = trimmedLine.mid(trimmedLine.indexOf(' ')+1);
+                        QString arg0 = line.mid(line.indexOf(' ') + 1);
                         rtError(RT_INVALID_DEFINITION, arg0.toStdString().c_str());
-                        continue;
                     }
                     else
                     {
-                        int ws1 = trimmedLine.indexOf(' ')+1;
-                        int ws2 = trimmedLine.lastIndexOf(' ');
-                        macroRegex.insert(3, trimmedLine.mid(ws1, ws2-ws1) + QString("|"));
+                        int pos = m.captured().indexOf(' ');
+                        macros.push_back(m.captured().left(pos));
                     }
                 }
-                else if (trimmedLine.startsWith("include "))
+                else if (line.startsWith(p2))
                 {
-                    regex.setPattern("include\\s+(\"|<).+(\"|>)$");
-                    if (!regex.match(trimmedLine).hasMatch())
+                    QRegularExpressionMatch m = regInc.match(line);
+                    if (!m.hasMatch())
                     {
-                        // Invalid include expression
-                        QString arg0 = trimmedLine.mid(trimmedLine.indexOf(' ')+1);
+                        QString arg0 = line.mid(line.indexOf(' ') + 1);
                         rtError(RT_INVALID_INCLUDE, arg0.toStdString().c_str());
-                        continue;
                     }
                 }
-                else if (trimmedLine.startsWith("move "))
+                else if (isXSE && line.startsWith(p3))
                 {
-                    regex.setPattern("move\\s+(\\b\\d+\\b)|(\\b0[xX][0-9a-fA-F]+\\b)$");
-                    if (!regex.match(trimmedLine).hasMatch())
+                    QRegularExpressionMatch m = regOrg.match(line);
+                    if (!m.hasMatch())
                     {
-                        // Could be invalid, but we have to assure that
-                        // there isn't a defined macro value.
-                        regex.setPattern(macroRegex);
-                        if (!regex.match(trimmedLine).hasMatch())
-                        {
-                            // Invalid move identifier
-                            QString arg0 = trimmedLine.mid(trimmedLine.indexOf(' ')+1);
-                            rtError(RT_INVALID_MOVEMENT, arg0.toStdString().c_str());
-                            continue;
-                        }
-                    }
-                }
-                else if (trimmedLine.startsWith("item "))
-                {
-                    regex.setPattern("item\\s+(\\d+)|(0[xX][0-9a-fA-F]+)$");
-                    if (!regex.match(trimmedLine).hasMatch())
-                    {
-                        // Could be invalid, but we have to assure that
-                        // there isn't a defined macro value.
-                        regex.setPattern(macroRegex);
-                        if (!regex.match(trimmedLine).hasMatch())
-                        {
-                            // Invalid item identifier
-                            QString arg0 = trimmedLine.mid(trimmedLine.indexOf(' ')+1);
-                            rtError(RT_INVALID_ITEM, arg0.toStdString().c_str());
-                            continue;
-                        }
-                    }
-                }
-                else if (trimmedLine.startsWith("byte "))
-                {
-                    regex.setPattern("byte\\s+(\\b\\d+\\b)|(\\b0[xX][0-9a-fA-F]+\\b)$");
-                    if (!regex.match(trimmedLine).hasMatch())
-                    {
-                        // Invalid byte identifier
-                        QString arg0 = trimmedLine.mid(trimmedLine.indexOf(' ')+1);
-                        rtError(RT_INVALID_BYTE, arg0.toStdString().c_str());
-                        continue;
-                    }
-                    else
-                    {
-                        // Is most likely correct, but can exceed 8-bit
-                        int ws = trimmedLine.indexOf(' ')+1;
-                        QString sub = trimmedLine.mid(ws);
-
-                        // Determines whether value is outside range
-                        if (!checkRange(sub, 0xFF))
-                        {
-                            // Overflow
-                            int arg0 = extractNumber(sub);
-                            rtError(RT_OVERFLOW_BYTE, arg0);
-                            continue;
-                        }
-                    }
-                }
-                else if (trimmedLine.startsWith("hword "))
-                {
-                    regex.setPattern("hword\\s+(\\b\\d+\\b)|(\\b0[xX][0-9a-fA-F]+\\b)$");
-                    if (!regex.match(trimmedLine).hasMatch())
-                    {
-                        // Invalid hword identifier
-                        QString arg0 = trimmedLine.mid(trimmedLine.indexOf(' ')+1);
-                        rtError(RT_INVALID_BYTE, arg0.toStdString().c_str());
-                        continue;
-                    }
-                    else
-                    {
-                        // Is most likely correct, but can exceed 16-bit
-                        int ws = trimmedLine.indexOf(' ')+1;
-                        QString sub = trimmedLine.mid(ws);
-
-                        // Determines whether value is outside range
-                        if (!checkRange(sub, 0xFFFF))
-                        {
-                            // Overflow
-                            int arg0 = extractNumber(sub);
-                            rtError(RT_OVERFLOW_HWORD, arg0);
-                            continue;
-                        }
-                    }
-                }
-                else if (trimmedLine.startsWith("word "))
-                {
-                    regex.setPattern("word\\s+(\\b\\d+\\b)|(\\b0[xX][0-9a-fA-F]+\\b)$");
-                    if (!regex.match(trimmedLine).hasMatch())
-                    {
-                        // Invalid word identifier
-                        QString arg0 = trimmedLine.mid(trimmedLine.indexOf(' ')+1);
-                        rtError(RT_INVALID_BYTE, arg0.toStdString().c_str());
-                        continue;
-                    }
-                    else
-                    {
-                        // Is most likely correct, but can exceed 32-bit
-                        int ws = trimmedLine.indexOf(' ')+1;
-                        QString sub = trimmedLine.mid(ws);
-
-                        // Determines whether value is outside range
-                        if (!checkRange(sub, 0xFFFFFFFF))
-                        {
-                            // Overflow
-                            int arg0 = extractNumber(sub);
-                            rtError(RT_OVERFLOW_WORD, arg0);
-                            continue;
-                        }
-                    }
-                }
-                else if (trimmedLine.startsWith("org "))
-                {
-                    if (isXSE)
-                        regex.setPattern("org\\s+@(\\w|\\d)+$");
-                    else
-                        regex.setPattern("org\\s+\\w(\\w|\\d)+:$");
-
-                    if (!regex.match(trimmedLine).hasMatch())
-                    {
-                        // Invalid label
-                        QString arg0 = trimmedLine.mid(trimmedLine.indexOf(' ')+1);
+                        QString arg0 = line.mid(line.indexOf(' ') + 1);
                         rtError(RT_INVALID_LABEL, arg0.toStdString().c_str());
-                        continue;
+                    }
+                }
+                else if (line.startsWith(p4))
+                {
+                    QRegularExpressionMatch m = regMove.match(line);
+                    if (!m.hasMatch() && !isValidDef(p4, line, macros))
+                    {
+                        QString arg0 = line.mid(line.indexOf(' ') + 1);
+                        rtError(RT_INVALID_MOVEMENT, arg0.toStdString().c_str());
                     }
                     else
                     {
-                        int ws = trimmedLine.indexOf(' ')+1;
-                        QString sub = trimmedLine.mid(ws);
-                        if (sub.right(1) == ":")
-                            sub.rightRef(1).clear();
-
-                        labels.push_back(sub);
+                        if (!checkRange(m.captured(), 0xFF))
+                            rtError(RT_INVALID_BYTE, m.captured().toStdString().c_str());
+                    }
+                }
+                else if (line.startsWith(p5))
+                {
+                    QRegularExpressionMatch m = regItem.match(line);
+                    if (!m.hasMatch() && !isValidDef(p5, line, macros))
+                    {
+                        QString arg0 = line.mid(line.indexOf(' ') + 1);
+                        rtError(RT_INVALID_ITEM, arg0.toStdString().c_str());
+                    }
+                    else
+                    {
+                        if (!checkRange(m.captured(), 0xFFFF))
+                            rtError(RT_INVALID_HWORD, m.captured().toStdString().c_str());
+                    }
+                }
+                else if (line.startsWith(p6))
+                {
+                    QRegularExpressionMatch m = regByte.match(line);
+                    if (!m.hasMatch() && !isValidDef(p6, line, macros))
+                    {
+                        QString arg0 = line.mid(line.indexOf(' ') + 1);
+                        rtError(RT_INVALID_ITEM, arg0.toStdString().c_str());
+                    }
+                    else
+                    {
+                        if (!checkRange(m.captured(), 0xFF))
+                            rtError(RT_INVALID_HWORD, m.captured().toStdString().c_str());
+                    }
+                }
+                else if (line.startsWith(p7))
+                {
+                    QRegularExpressionMatch m = regHalf.match(line);
+                    if (!m.hasMatch() && !isValidDef(p7, line, macros))
+                    {
+                        QString arg0 = line.mid(line.indexOf(' ') + 1);
+                        rtError(RT_INVALID_ITEM, arg0.toStdString().c_str());
+                    }
+                    else
+                    {
+                        if (!checkRange(m.captured(), 0xFFFF))
+                            rtError(RT_INVALID_HWORD, m.captured().toStdString().c_str());
+                    }
+                }
+                else if (line.startsWith(p8))
+                {
+                    QRegularExpressionMatch m = regWord.match(line);
+                    if (!m.hasMatch() && !isValidDef(p8, line, macros))
+                    {
+                        QString arg0 = line.mid(line.indexOf(' ') + 1);
+                        rtError(RT_INVALID_ITEM, arg0.toStdString().c_str());
+                    }
+                    else
+                    {
+                        if (!checkRange(m.captured(), 0xFFFFFFFF))
+                            rtError(RT_INVALID_HWORD, m.captured().toStdString().c_str());
                     }
                 }
                 else
                 {
-                    // Unknown preprocessor directive
-                    QString arg0 = trimmedLine.mid(0, trimmedLine.indexOf(' '));
+                    QString arg0 = line.mid(0, line.indexOf(' '));
                     rtError(RT_UNKNOWN_PREPROC, arg0.toStdString().c_str());
-                    continue;
                 }
+
+                continue;
             }
-            else if (!isXSE && trimmedLine.right(1) == ":")
+            else if (!isXSE && line.contains(":"))
             {
-                regex.setPattern("^\\w(\\w|\\d)+:$");
-                if (!regex.match(trimmedLine).hasMatch())
+                QRegularExpressionMatch m = regLbl.match(line);
+                if (!m.hasMatch())
+                    rtError(RT_INVALID_LABEL, line.toStdString().c_str());
+
+                continue;
+            }
+
+
+            //////////////////////////////////////////////////////////////////////////////
+            //                                                                          //
+            //                                                                          //
+            //         Determines whether line is a command or macro function           //
+            //                                                                          //
+            //                                                                          //
+            //////////////////////////////////////////////////////////////////////////////
+            // Finds the name of the command or macro function
+            QTextCursor cursor = m_Edit->textCursor();
+            cursor.select(QTextCursor::Document);
+            cursor.removeSelectedText();
+            cursor.insertText(line);
+            cursor.movePosition(QTextCursor::Start);
+            cursor.select(QTextCursor::WordUnderCursor);
+
+            QString command = cursor.selectedText();
+            const Command *cmd = Configuration::findByName(command);
+            if (cmd != NULL)
+            {
+                // Check command parameters
+                QStringList params;
+                int space = line.indexOf(' ');
+                while (space != -1)
                 {
-                    // Invalid ASE label
-                    rtError(RT_INVALID_ASE_LABEL, trimmedLine.toStdString().c_str());
+                    int next = line.indexOf(' ', ++space);
+                    params.push_back(line.mid(space, next-space));
+                    space = next;
+                }
+                if (params.size() != cmd->params().size())
+                {
+                    // Invalid argument count
+                    int arg1 = params.size(), arg2 = cmd->params().size();
+                    rtError(RT_INVALID_ARGCOUNT, command.toStdString().c_str(), arg1, arg2);
                     continue;
                 }
             }
             else
             {
-                // Some unknown identifier we don't know yet
-                // Can be a command or a macro command
-
-                // Extracts the command itself
-                QString command;
-                int ws = trimmedLine.indexOf(' ');
-                if (ws == -1) // command without args?
-                    command = trimmedLine;
-                else
-                    command = trimmedLine.left(ws);
-
-                // Attempts to find that command
-                const Command *cmd = Configuration::findByName(command);
-                if (cmd == NULL)
+                // Attempts to find a macro function instead
+                const Macro *macro = Configuration::findMacroByName(command);
+                if (macro == NULL)
                 {
-                    // Attempts to find it in the macroes
-                    const Macro *mcr = Configuration::findMacroByName(command);
-                    if (mcr == NULL)
-                    {
-                        // Unknown identifier
-                        rtError(RT_UNKNOWN_IDENTIFIER, trimmedLine.toStdString().c_str());
-                        continue;
-                    }
-                    else
-                    {
-                        // Check macro parameters
-                        QStringList params;
-                        QList<MacroDynamicParam *> mcrParams;
-                        while (ws != -1)
-                        {
-                            int next = trimmedLine.indexOf(' ', ws+1);
-                            params.push_back(trimmedLine.mid(ws+1, next-(ws+1)));
-                            ws = next;
-                        }
-                        for (int j = 0; j < mcr->entries().size(); j++)
-                        {
-                            mcrParams.append(mcr->entries().at(i)->dynamicParams());
-                        }
-                        if (params.size() != mcrParams.size())
-                        {
-                            // Invalid argument count
-                            int arg1 = params.size();
-                            int arg2 = mcrParams.size();
-                            rtError(RT_INVALID_ARGCOUNT, command.toStdString().c_str(), arg1, arg2);
-                            continue;
-                        }
-                        else
-                        {
-                            for (int j = 0; j < params.size(); j++)
-                            {
-                                ParameterType type;
-                                QString param = params.at(j);
-                                if (param.left(1) == "@")
-                                    param.leftRef(1).clear();
-
-                                if (type < PT_Pointer)
-                                {
-                                    if (!regHex.exactMatch(param))
-                                    {
-                                        // Is not a number!
-                                        rtError(RT_INVALID_PARAMETER_N, j, param.toStdString().c_str());
-                                        break;
-                                    }
-                                    /*if (!checkRange(param, ParameterTypeHelper::GetMaxValue(type)))
-                                    {
-                                        // Parameter out of range!
-                                        int arg1 = ParameterTypeHelper::GetMaxValue(type);
-                                        int arg2 = extractNumber(param);
-                                        rtError(RT_INVALID_PARAMETER_O, j, arg1, arg2);
-                                        break;
-                                    }*/
-                                }
-                                else
-                                {
-                                    if (!regHex.exactMatch(param))
-                                    {
-                                        // Determines whether the label is existing
-                                        if (!labels.contains(param))
-                                        {
-                                            regex.setPattern(macroRegex);
-                                            if (!regex.match(param).hasMatch())
-                                            {
-                                                // Not a macro, not a label (warning!)
-                                                rtWarning(RT_INVALID_PARAMETER_I, param.toStdString().c_str());
-                                                break;
-                                            }
-                                        }
-                                    }
-                                    /*if (!checkRange(param, ParameterTypeHelper::GetMaxValue(type)))
-                                    {
-                                        // Parameter out of range!
-                                        int arg1 = ParameterTypeHelper::GetMaxValue(type);
-                                        int arg2 = extractNumber(param);
-                                        rtError(RT_INVALID_PARAMETER_O, j, arg1, arg2);
-                                        break;
-                                    }*/
-                                }
-                            }
-                        }
-                    }
+                    // Unknown identifier
+                    rtError(RT_UNKNOWN_IDENTIFIER, line.toStdString().c_str());
+                    continue;
                 }
-                else
-                {
-                    // Check command parameters
-                    QStringList params;
-                    while (ws != -1)
-                    {
-                        int next = trimmedLine.indexOf(' ', ws+1);
-                        params.push_back(trimmedLine.mid(ws+1, next-(ws+1)));
-                        ws = next;
-                    }
-                    if (params.size() != cmd->params().size())
-                    {
-                        // Invalid argument count
-                        int arg1 = params.size();
-                        int arg2 = cmd->params().size();
-                        rtError(RT_INVALID_ARGCOUNT, command.toStdString().c_str(), arg1, arg2);
-                        continue;
-                    }
-                    else
-                    {
-                        for (int j = 0; j < params.size(); j++)
-                        {
-                            ParameterType type = cmd->params().at(j)->type();
-                            QString param = params.at(j);
-                            if (param.left(1) == "@")
-                                param.leftRef(1).clear();
 
-                            if (type < PT_Pointer)
-                            {
-                                if (!regHex.exactMatch(param))
-                                {
-                                    // Is not a number!
-                                    rtError(RT_INVALID_PARAMETER_N, j, param.toStdString().c_str());
-                                    break;
-                                }
-                                if (!checkRange(param, ParameterTypeHelper::GetMaxValue(type)))
-                                {
-                                    // Parameter out of range!
-                                    int arg1 = ParameterTypeHelper::GetMaxValue(type);
-                                    int arg2 = extractNumber(param);
-                                    rtError(RT_INVALID_PARAMETER_O, j, arg1, arg2);
-                                    break;
-                                }
-                            }
-                            else
-                            {
-                                if (!regHex.exactMatch(param))
-                                {
-                                    // Determines whether the label is existing
-                                    if (!labels.contains(param))
-                                    {
-                                        regex.setPattern(macroRegex);
-                                        if (!regex.match(param).hasMatch())
-                                        {
-                                            // Not a macro, not a label (warning!)
-                                            rtWarning(RT_INVALID_PARAMETER_I, param.toStdString().c_str());
-                                            break;
-                                        }
-                                    }
-                                }
-                                if (!checkRange(param, ParameterTypeHelper::GetMaxValue(type)))
-                                {
-                                    // Parameter out of range!
-                                    int arg1 = ParameterTypeHelper::GetMaxValue(type);
-                                    int arg2 = extractNumber(param);
-                                    rtError(RT_INVALID_PARAMETER_O, j, arg1, arg2);
-                                    break;
-                                }
-                            }
-                        }
-                    }
+                // Check macro parameters
+                QStringList params;
+                QList<MacroDynamicParam *> dynParams;
+                int space = line.indexOf(' ');
+                while (space != -1)
+                {
+                    int next = line.indexOf(' ', ++space);
+                    params.push_back(line.mid(space, next-space));
+                    space = next;
+                }
+                for (int j = 0; j < macro->entries().size(); ++j)
+                {
+                    dynParams.append(macro->entries().at(j)->dynamicParams());
+                }
+                if (params.size() != dynParams.size())
+                {
+                    // Invalid argument count
+                    int arg1 = params.size(), arg2 = dynParams.size();
+                    rtError(RT_INVALID_ARGCOUNT, command.toStdString().c_str(), arg1, arg2);
+                    continue;
                 }
             }
         }

@@ -41,6 +41,7 @@
 ///////////////////////////////////////////////////////////
 #include <QMutex>
 #include <QThread>
+#include <QTextEdit>
 
 
 namespace ase
@@ -94,6 +95,12 @@ namespace ase
         ///////////////////////////////////////////////////////////
         void interrupt();
 
+        ///////////////////////////////////////////////////////////
+        /// \brief Specifies the text edit for the text cursor.
+        ///
+        ///////////////////////////////////////////////////////////
+        void setTextEdit(QTextEdit *edit);
+
 
     public slots:
 
@@ -113,6 +120,11 @@ namespace ase
         ///
         ///////////////////////////////////////////////////////////
         void finished(const QList<NotifyEntry> notifications);
+
+
+    private:
+
+        QTextEdit *m_Edit;
     };
 }
 
